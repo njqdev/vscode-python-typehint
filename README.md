@@ -6,6 +6,8 @@ This extension provides type hint autocompletion for Python.
 
 * Estimates the correct type to provide as an autocompletion item.
 
+![](demo.gif)
+
 
 ## Installation
 
