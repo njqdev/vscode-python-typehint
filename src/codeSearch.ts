@@ -1,25 +1,10 @@
 import {
     TextLine, 
-    Position
+    Position,
+    TextDocument
  } from "vscode";
 
 import { anyTypeName, Type } from "./syntax";
-
-/**
- * Finds the param which is about to be type hinted.
- * 
- * @param line The active line.
- * @param pos The active position.
- */
-export function findParam(line: TextLine, pos: Position): string | null {
-    let param = null;
-    let split = line.text.substr(0, pos.character).split(new RegExp("[,(]"));
-    if (split.length > 1) {
-        param = split[split.length - 1].trim();
-        param = param.substr(0, param.length - 1);
-    }
-    return param;
-}
 
 /**
  * Detects the type of an initialized variable.
@@ -46,7 +31,7 @@ export function detectBasicType(src: string, srcIsLineOfCode = true): string | n
  * @param documentText The source code of the text document.
  * @returns The type or null if not found.
  */
-export function detectNotBasicType(lineText: string, documentText: string): string | null {
+export function detectNonBasicType(lineText: string, documentText: string): string | null {
     let regExp = new RegExp("= *(" + anyTypeName + ")\\(?");
     const match = regExp.exec(lineText);
 
@@ -56,6 +41,10 @@ export function detectNotBasicType(lineText: string, documentText: string): stri
 
     if (match[0].endsWith("(")) {
         
+        if (isClass(match[1], documentText)) {
+            return match[1];
+        }
+
         if (isProbablyAClass(match[1])) {
             regExp = new RegExp(`^[ \t]*def ${match[1]}\\(`, "m" );
             if (!regExp.test(documentText)) {
@@ -75,20 +64,15 @@ export function detectNotBasicType(lineText: string, documentText: string): stri
         }
         return null;
     }
-    if ( 
-        isImported(
-            match[1],
-            documentText.substr(match.index - match.length)
-        )
-    ) {
+    if (importFound(match[1], documentText.substr(match.index - match.length))) {
         // Searching the import source document is not supported (yet?)
         return null;
     }
 
     regExp = new RegExp(`^[ \t]*${match[1]} *=.*`, "m");
-    let objInitializationMatch = regExp.exec(documentText);
-    if (objInitializationMatch) {
-        return detectBasicType(objInitializationMatch[0]);
+    let varInitializationMatch = regExp.exec(documentText);
+    if (varInitializationMatch) {
+        return detectBasicType(varInitializationMatch[0]);
     }
     
     return null;
@@ -125,16 +109,22 @@ export function invalidTernaryOperator(typeName: string, lineSrc: string) {
     return false;
 }
 
-function isImported(text: string, documentText: string): boolean {
+function isClass(object: string, documentText: string) {
     return new RegExp(
-        `^ *(import +${text}|from +[a-zA-Z_][a-zA-Z0-9_-]* +import +${text}`
-        + `|import +${anyTypeName} +as +${text})`,
+        `^ *class +${object}`,
         "m"
     ).test(documentText);
 }
 
-function isProbablyAClass(text: string): boolean {
-    return new RegExp(`^([a-zA-Z0-9_]+\\.)*[A-Z]`, "m").test(text);
+function importFound(object: string, documentText: string): boolean {
+    return new RegExp(
+        `^[ \t]*(import +${object}|from +[a-zA-Z_][a-zA-Z0-9_-]* +import +${object}|import +${anyTypeName} +as +${object})`,
+        "m"
+    ).test(documentText);
+}
+
+function isProbablyAClass(lineText: string): boolean {
+    return new RegExp(`^([a-zA-Z0-9_]+\\.)*[A-Z]`, "m").test(lineText);
 }
 
 function isType(text: string): boolean {
@@ -164,9 +154,11 @@ function getTypeRegEx(typeName: string, prefix: string): RegExp {
         case Type.Tuple:
             return new RegExp(`${prefix}(\\(([^'\",)]+,|\"[^\"]*\"(?= *,)|'[^']*'(?= *,))|tuple\\()`, "m"); 
         case Type.Complex:
-            return new RegExp(`${prefix}(\\(complex\\(|[0-9][0-9+-/*.]*[jJ])`, "m");        
+            return new RegExp(`${prefix}(\\(complex\\(|[0-9][0-9+-/*.]*[jJ])`, "m");
+        case Type.Object:
+            return new RegExp(`${prefix}object\\(`, "m");        
         default:
-            return new RegExp(`${prefix}object\\(`, "m");
+            return new RegExp(`^.*$`, "m");
     }
 }
 

@@ -4,21 +4,23 @@ import * as search from "./codeSearch";
 export class TypeResolver {
     
     /**
-     * Finds the type of a parameter.
+     * Estimates the type of a parameter.
      * @param doc The document to search.
      * @param param The parameter name.
      */
-    public FindTypeInDocument(doc: TextDocument, param: string): string | null {
+    public EstimateType(doc: TextDocument, param: string): string | null {
         const documentText = doc.getText();
         let type: string | null = "";
-        let m = new RegExp("^[ \t]*" + param + " *=", "m").exec(documentText);
-        if (m && m[0]) {
-            let line = doc.lineAt(doc.positionAt(m.index + m[0].length - 1));
+        const match = new RegExp(`^[ \t]*${param} *=.`, "m").exec(documentText);
+
+        if (match && match[0]) {
+            const valueStartPosition = doc.positionAt(match.index + match[0].length);
+            const line = doc.lineAt(valueStartPosition);
 
             type = search.detectBasicType(line.text);
 
             if (type === null) {
-                type = search.detectNotBasicType(line.text, documentText);
+                type = search.detectNonBasicType(line.text, documentText);
             }
 
             if (type !== null) {
