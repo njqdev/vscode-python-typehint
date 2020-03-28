@@ -10,12 +10,12 @@ import {
     TextDocument
 } from "vscode";
 import { TypeResolver } from "./typeResolver";
-import { typeHintCharacter, Type } from "./syntax";
+import { paramHintTrigger, returnHintTrigger, Type } from "./syntax";
 
 /**
- * Provides one or more type hint {@link CompletionItem}.
+ * Provides one or more parameter type hint {@link CompletionItem}.
  */
-export class HintCompletionProvider implements CompletionItemProvider {
+export class ParamHintCompletionProvider implements CompletionItemProvider {
 
     public provideCompletionItems(
         doc: TextDocument, 
@@ -23,7 +23,7 @@ export class HintCompletionProvider implements CompletionItemProvider {
         token: CancellationToken,
         context: CompletionContext
     ): Thenable<CompletionList> | null {
-        if (context.triggerCharacter !== typeHintCharacter) {
+        if (context.triggerCharacter !== paramHintTrigger) {
             return null;
         }
         const items: CompletionItem[] = [];
@@ -58,5 +58,45 @@ export class HintCompletionProvider implements CompletionItemProvider {
             param = param.substr(0, param.length - 1);
         }
         return param;
+    }
+}
+
+/**
+ * Provides one or more return type hint {@link CompletionItem}.
+ */
+export class ReturnHintCompletionProvider implements CompletionItemProvider {
+
+    public provideCompletionItems(
+        doc: TextDocument, 
+        pos: Position,
+        token: CancellationToken,
+        context: CompletionContext
+    ): Thenable<CompletionList> | null {
+        if (context.triggerCharacter !== returnHintTrigger) {
+            return null;
+        }
+        const items: CompletionItem[] = [];
+        const line = doc.lineAt(pos);
+
+        if (this.shouldProvideReturnHint(line, pos)) {         
+            pushDefaultCompletionItems(items);
+        }
+        return Promise.resolve(new CompletionList(items, false));
+    }
+
+    private shouldProvideReturnHint(line: TextLine, pos: Position): boolean {
+        if (pos.character > 0 && line.text.substr(pos.character - 2, 2) === "->") {
+            
+            if (new RegExp("^[*\t]*def.*\\) *->[: ]*$", "m").test(line.text)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+function pushDefaultCompletionItems(items: CompletionItem[]) {
+    for (const type of Object.values(Type)) {
+        items.push(new CompletionItem(" " + type, CompletionItemKind.TypeParameter));
     }
 }

@@ -15,6 +15,6 @@ The extension is not published yet.
 
 ## Known Issues
 
-* The difference between classes and function calls when detecting types is determined by the first letter being upper case (unless the class or function is declared in the currently edited document).
+* The difference between classes and function calls when detecting types is determined by the first letter being upper case (unless the class or function is defined in the currently edited document).
 
 -------------------------------------------------------------------------------------------

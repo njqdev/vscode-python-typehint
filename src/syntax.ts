@@ -1,7 +1,8 @@
 
 export const anyTypeName: string = "[a-zA-Z_][a-zA-Z0-9_.]*";
 
-export const typeHintCharacter: string = ":";
+export const paramHintTrigger: string = ":";
+export const returnHintTrigger: string = ">";
 
 /**
  * Contains built-in Python types which can be hinted. 

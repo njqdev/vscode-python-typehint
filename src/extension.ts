@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { HintCompletionProvider } from './completionProvider';
-import { typeHintCharacter } from "./syntax";
+import { ParamHintCompletionProvider, ReturnHintCompletionProvider } from './completionProvider';
+import { paramHintTrigger, returnHintTrigger } from "./syntax";
 
 // Called when the extension is activated.
 export function activate(context: vscode.ExtensionContext) {
@@ -11,7 +11,8 @@ export function activate(context: vscode.ExtensionContext) {
     }
     
     context.subscriptions.push(
-        vscode.languages.registerCompletionItemProvider('python', new HintCompletionProvider(), typeHintCharacter)
+        vscode.languages.registerCompletionItemProvider('python', new ParamHintCompletionProvider(), paramHintTrigger),
+        vscode.languages.registerCompletionItemProvider('python', new ReturnHintCompletionProvider(), returnHintTrigger)
     );
 }
 
