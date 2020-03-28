@@ -1,7 +1,8 @@
 {
 	"name": "vscode-python-typehint",
 	"displayName": "Python Type Hint",
-	"description": "VSCode extension for Python type hint autocompletion.",
+    "description": "VSCode extension for Python type hint autocompletion.",
+    "publisher": "nj2532",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/nj2532/vscode-python-typehint.git"

@@ -36,9 +36,7 @@ export class ParamHintCompletionProvider implements CompletionItemProvider {
             if (hint) {
                 items.push(new CompletionItem(" " + hint, CompletionItemKind.TypeParameter));
             } else {
-                for (const type of Object.values(Type)) {
-                    items.push(new CompletionItem(" " + type, CompletionItemKind.TypeParameter));
-                }
+                pushDefaultCompletionItems(items);
             }
         }
         return Promise.resolve(new CompletionList(items, false));
@@ -85,11 +83,10 @@ export class ReturnHintCompletionProvider implements CompletionItemProvider {
     }
 
     private shouldProvideReturnHint(line: TextLine, pos: Position): boolean {
+
         if (pos.character > 0 && line.text.substr(pos.character - 2, 2) === "->") {
             
-            if (new RegExp("^[*\t]*def.*\\) *->[: ]*$", "m").test(line.text)) {
-                return true;
-            }
+            return new RegExp("^[*\t]*def.*\\) *->[: ]*$", "m").test(line.text);
         }
         return false;
     }
