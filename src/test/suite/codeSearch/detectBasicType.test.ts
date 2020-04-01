@@ -60,6 +60,10 @@ suite('detectBasicType', function() {
         src = "var = -.3";
         actual = detectBasicType(src);
         assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+
+        src = "var = 1 + 2 - 1 * 2 /  2.0";
+        actual = detectBasicType(src);
+        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
     });
 
     test("detects complex numbers", () => {
@@ -126,6 +130,22 @@ suite('detectBasicType', function() {
         let actual = detectBasicType(src);
         assert.equal(actual, expected);
     });
+
+    test("detects sets", () => {
+        const expected = "set";
+
+        let src = "var = {'dont return dict please'}";
+        let actual = detectBasicType(src);
+        assert.equal(actual, expected);
+
+        src = "var = {1, 2}";
+        actual = detectBasicType(src);
+        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+
+        src = "var = {1 , 2}";
+        actual = detectBasicType(src);
+        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+    });
     
     test("detects type() call", () => {
         const testCases: TestCase[] = [
@@ -134,7 +154,8 @@ suite('detectBasicType', function() {
             { data: "var = list(foo)", expected: "list"},
             { data: "var = dict(foo)", expected: "dict"},
             { data: "var = tuple(foo)", expected: "tuple"},
-            { data: "var = str(1)", expected: "str"}
+            { data: "var = str(1)", expected: "str"},
+            { data: "var = set([1])", expected: "set"}
         ];
         for (const c of testCases) {
             assert.equal(detectBasicType(c.data), c.expected);

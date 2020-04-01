@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ParamHintCompletionProvider, ReturnHintCompletionProvider } from './completionProvider';
-import { paramHintTrigger, returnHintTrigger } from "./syntax";
+import { paramHintTrigger, returnHintTrigger } from "./python";
 
 // Called when the extension is activated.
 export function activate(context: vscode.ExtensionContext) {

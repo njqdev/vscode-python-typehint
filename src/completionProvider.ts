@@ -9,13 +9,27 @@ import {
     TextLine,
     TextDocument
 } from "vscode";
-import { TypeResolver } from "./typeResolver";
-import { paramHintTrigger, returnHintTrigger, Type } from "./syntax";
+import { TypeResolver, TypeResolution } from "./typeResolver";
+import { paramHintTrigger, returnHintTrigger, Types } from "./python";
+
+
+abstract class CompletionProvider {
+
+    protected pushTypesToItems(types: string[], completionItems: CompletionItem[]) {
+        for (const type of types) {
+            const item = new CompletionItem(" " + type, CompletionItemKind.TypeParameter);
+    
+            // Prioritize type estimations and sort remaining items alphabetically
+            item.sortText = `999${type}`;   
+            completionItems.push(item);
+        }
+    }
+}
 
 /**
  * Provides one or more parameter type hint {@link CompletionItem}.
  */
-export class ParamHintCompletionProvider implements CompletionItemProvider {
+export class ParamHintCompletionProvider extends CompletionProvider implements CompletionItemProvider {
 
     public provideCompletionItems(
         doc: TextDocument, 
@@ -31,13 +45,10 @@ export class ParamHintCompletionProvider implements CompletionItemProvider {
         const param = this.findParam(line, pos);
 
         if (param && param.length > 0) {         
-            let hint = new TypeResolver().EstimateType(doc, param);
-
-            if (hint) {
-                items.push(new CompletionItem(" " + hint, CompletionItemKind.TypeParameter));
-            } else {
-                pushDefaultCompletionItems(items);
-            }
+            const resolution = new TypeResolver().ResolveTypes(param, doc);
+            this.pushTypeResolutionToItems(resolution, items);
+        } else {
+            this.pushTypesToItems(Object.values(Types), items);
         }
         return Promise.resolve(new CompletionList(items, false));
     }
@@ -57,12 +68,27 @@ export class ParamHintCompletionProvider implements CompletionItemProvider {
         }
         return param;
     }
+    
+    private pushTypeResolutionToItems(resolution: TypeResolution, items: CompletionItem[]) {
+
+        if (resolution.estimations) {
+            for (let i = 0; i < resolution.estimations.length; i++) {
+                const typeName = resolution.estimations[i];
+                const item = new CompletionItem(" " + typeName, CompletionItemKind.TypeParameter);
+                item.sortText = `${i}${typeName}`;
+                item.preselect = true;
+                items.push(item);
+            }       
+
+        }
+        this.pushTypesToItems(resolution.remainingTypes, items);
+    }
 }
 
 /**
  * Provides one or more return type hint {@link CompletionItem}.
  */
-export class ReturnHintCompletionProvider implements CompletionItemProvider {
+export class ReturnHintCompletionProvider extends CompletionProvider implements CompletionItemProvider {
 
     public provideCompletionItems(
         doc: TextDocument, 
@@ -77,7 +103,7 @@ export class ReturnHintCompletionProvider implements CompletionItemProvider {
         const line = doc.lineAt(pos);
 
         if (this.shouldProvideReturnHint(line, pos)) {         
-            pushDefaultCompletionItems(items);
+            this.pushTypesToItems(Object.values(Types), items);
         }
         return Promise.resolve(new CompletionList(items, false));
     }
@@ -89,11 +115,5 @@ export class ReturnHintCompletionProvider implements CompletionItemProvider {
             return new RegExp("^[*\t]*def.*\\) *->[: ]*$", "m").test(line.text);
         }
         return false;
-    }
-}
-
-function pushDefaultCompletionItems(items: CompletionItem[]) {
-    for (const type of Object.values(Type)) {
-        items.push(new CompletionItem(" " + type, CompletionItemKind.TypeParameter));
     }
 }

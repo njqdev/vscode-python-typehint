@@ -1,10 +1,10 @@
-import {
-    TextLine, 
-    Position,
-    TextDocument
- } from "vscode";
+import { anyTypeName, Types } from "./python";
 
-import { anyTypeName, Type } from "./syntax";
+
+export interface TypeSearchResult {
+    typeName: string | null;
+        
+}
 
 /**
  * Detects the type of an initialized variable.
@@ -15,8 +15,8 @@ import { anyTypeName, Type } from "./syntax";
  */
 export function detectBasicType(src: string, srcIsLineOfCode = true): string | null {
 
-    for (const typeName of Object.values(Type)) {
-        let r = getTypeRegEx(typeName, srcIsLineOfCode ? "= *" : "");
+    for (const typeName of typeSearchOrder) {
+        let r = typeSearchRegExp(typeName, srcIsLineOfCode ? "= *" : "");
         if (r.test(src)) {
             return typeName;
         }
@@ -41,7 +41,7 @@ export function detectNonBasicType(lineText: string, documentText: string): stri
 
     if (match[0].endsWith("(")) {
         
-        if (isClass(match[1], documentText)) {
+        if (classWithSameName(match[1], documentText)) {
             return match[1];
         }
 
@@ -87,10 +87,7 @@ export function detectNonBasicType(lineText: string, documentText: string): stri
  */
 export function invalidTernaryOperator(typeName: string, lineSrc: string) {
 
-    const regExp = new RegExp(
-        " if +[^ ]+ +else( +[^ ]+) *$", 
-        "m"
-    );
+    const regExp = new RegExp(" if +[^ ]+ +else( +[^ ]+) *$", "m");
 
     let ternaryMatch = regExp.exec(lineSrc);
     while (ternaryMatch) {
@@ -109,11 +106,14 @@ export function invalidTernaryOperator(typeName: string, lineSrc: string) {
     return false;
 }
 
-function isClass(object: string, documentText: string) {
-    return new RegExp(
-        `^ *class +${object}`,
-        "m"
-    ).test(documentText);
+/**
+ * Searches for a class with the same name as object and returns the name if found.
+ * @param object The object.
+ * @param documentText The text to search
+ */
+export function classWithSameName(object: string, documentText: string): string | null {
+    const clsMatch = new RegExp(`^ *class +(${object})`, "mi").exec(documentText);
+    return clsMatch ? clsMatch[1] : null;
 }
 
 function importFound(object: string, documentText: string): boolean {
@@ -128,8 +128,21 @@ function isProbablyAClass(lineText: string): boolean {
 }
 
 function isType(text: string): boolean {
-    return Object.values(Type).includes(text as Type);
+    return Object.values(Types).includes(text as Types);
 }
+
+const typeSearchOrder = [
+    Types.List, 
+    Types.Bool,
+    Types.Complex,
+    Types.Float,
+    Types.String,   
+    Types.Tuple,
+    Types.Set,
+    Types.Dict,
+    Types.Int,
+    Types.Object
+];
 
 /**
  * Get a new RegExp for finding basic types and {@class object}.
@@ -137,28 +150,29 @@ function isType(text: string): boolean {
  * @param typeName the type name
  * @param prefix a prefix added to the RegExp pattern
  */
-function getTypeRegEx(typeName: string, prefix: string): RegExp {
+function typeSearchRegExp(typeName: string, prefix: string): RegExp {
     switch (typeName) {
-        case Type.Bool:
-            return new RegExp(`${prefix}(True|False|bool\\()`, "m");
-        case Type.Dict:
-            return new RegExp(`${prefix}({|dict\\()`, "m");
-        case Type.Int:
-            return new RegExp(`${prefix}(-*[0-9]+(?!(\\.| *\\)| *,))|int\\()`, "m");
-        case Type.List:
+        case Types.List:
             return new RegExp(`${prefix}(\\[|list\\()`, "m");
-        case Type.String:
+        case Types.Bool:
+            return new RegExp(`${prefix}(True|False|bool\\()`, "m");
+        case Types.Complex:
+            return new RegExp(`${prefix}(\\(complex\\(|[[0-9+*\\/ -.]*[0-9][jJ])`, "m");
+        case Types.Float:
+            return new RegExp(`${prefix}(-*[0-9+*\/ -]*\\.[0-9]|float\\()`, "m");
+        case Types.Tuple:
+            return new RegExp(`${prefix}(\\(|tuple\\()`, "m"); 
+        case Types.String:
             return new RegExp(`${prefix}(['\"]{3}|(\\( *)?\"[^\"]*\"(?! *,)|(\\( *)?'[^']*'(?! *,)|str\\()`, "m");
-        case Type.Float:
-            return new RegExp(`${prefix}(-*[0-9]*\\.[0-9]+|float\\()`, "m");
-        case Type.Tuple:
-            return new RegExp(`${prefix}(\\(([^'\",)]+,|\"[^\"]*\"(?= *,)|'[^']*'(?= *,))|tuple\\()`, "m"); 
-        case Type.Complex:
-            return new RegExp(`${prefix}(\\(complex\\(|[0-9][0-9+-/*.]*[jJ])`, "m");
-        case Type.Object:
+        case Types.Set:
+            return new RegExp(`${prefix}({[^:]+[,}]|set\\()`, "m");
+        case Types.Dict:
+            return new RegExp(`${prefix}({|dict\\()`, "m");
+        case Types.Int:
+            return new RegExp(`${prefix}(-*[0-9]|int\\()`, "m");
+        case Types.Object:
             return new RegExp(`${prefix}object\\(`, "m");        
         default:
             return new RegExp(`^.*$`, "m");
     }
 }
-
