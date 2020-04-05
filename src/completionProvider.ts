@@ -9,18 +9,19 @@ import {
     TextLine,
     TextDocument
 } from "vscode";
-import { TypeResolver, TypeResolution } from "./typeResolver";
-import { paramHintTrigger, returnHintTrigger, Types } from "./python";
+import { TypeHintProvider, TypeHint } from "./typeHintProvider";
+import { paramHintTrigger, returnHintTrigger, TypeName } from "./python";
 
 
 abstract class CompletionProvider {
 
-    protected pushTypesToItems(types: string[], completionItems: CompletionItem[]) {
-        for (const type of types) {
-            const item = new CompletionItem(" " + type, CompletionItemKind.TypeParameter);
+    protected pushTypeNamesToItems(typeNames: TypeName[], completionItems: CompletionItem[]) {
+        for (const typeName of typeNames) {
+            const item = new CompletionItem(typeName, CompletionItemKind.TypeParameter);
     
-            // Prioritize type estimations and sort remaining items alphabetically
-            item.sortText = `999${type}`;   
+            // Add 999 to ensure they're sorted to the bottom of the CompletionList.
+            item.sortText = `999${typeName}`;
+            item.insertText = TypeHintProvider.insertTextFor(typeName);   
             completionItems.push(item);
         }
     }
@@ -31,25 +32,24 @@ abstract class CompletionProvider {
  */
 export class ParamHintCompletionProvider extends CompletionProvider implements CompletionItemProvider {
 
-    public provideCompletionItems(
+    public async provideCompletionItems(
         doc: TextDocument, 
         pos: Position,
         token: CancellationToken,
         context: CompletionContext
-    ): Thenable<CompletionList> | null {
+    ): Promise<CompletionList | null> {
         if (context.triggerCharacter !== paramHintTrigger) {
-            return null;
+            return Promise.resolve(null);
         }
         const items: CompletionItem[] = [];
         const line = doc.lineAt(pos);
         const param = this.findParam(line, pos);
+        const provider = new TypeHintProvider(doc);
 
-        if (param && param.length > 0) {         
-            const resolution = new TypeResolver().ResolveTypes(param, doc);
-            this.pushTypeResolutionToItems(resolution, items);
-        } else {
-            this.pushTypesToItems(Object.values(Types), items);
+        if (param && param.length > 0) {     
+            this.pushEstimationsToItems(await provider.getTypeHints(param), items); 
         }
+        this.pushTypeNamesToItems(provider.getRemainingTypes(), items);
         return Promise.resolve(new CompletionList(items, false));
     }
 
@@ -69,19 +69,25 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
         return param;
     }
     
-    private pushTypeResolutionToItems(resolution: TypeResolution, items: CompletionItem[]) {
+    protected pushEstimationsToItems(typeHints: TypeHint[], items: CompletionItem[]) {
 
-        if (resolution.estimations) {
-            for (let i = 0; i < resolution.estimations.length; i++) {
-                const typeName = resolution.estimations[i];
-                const item = new CompletionItem(" " + typeName, CompletionItemKind.TypeParameter);
-                item.sortText = `${i}${typeName}`;
-                item.preselect = true;
+        if (typeHints) {
+            let typeHint = typeHints[0].type;
+            let item = new CompletionItem(typeHint, CompletionItemKind.TypeParameter);
+            item.sortText = `0${typeHint}`;
+            item.preselect = true;
+            item.insertText = typeHints[0].insertText;
+            items.push(item);
+
+            for (let i = 1; i < typeHints.length; i++) {
+                typeHint = typeHints[i].type;
+                item = new CompletionItem(typeHint, CompletionItemKind.TypeParameter);
+                item.sortText = `${i}${typeHint}`;
+                item.insertText = typeHints[i].insertText;
                 items.push(item);
             }       
 
         }
-        this.pushTypesToItems(resolution.remainingTypes, items);
     }
 }
 
@@ -90,12 +96,12 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
  */
 export class ReturnHintCompletionProvider extends CompletionProvider implements CompletionItemProvider {
 
-    public provideCompletionItems(
+    public async provideCompletionItems(
         doc: TextDocument, 
         pos: Position,
         token: CancellationToken,
         context: CompletionContext
-    ): Thenable<CompletionList> | null {
+    ): Promise<CompletionList | null> {
         if (context.triggerCharacter !== returnHintTrigger) {
             return null;
         }
@@ -103,7 +109,7 @@ export class ReturnHintCompletionProvider extends CompletionProvider implements 
         const line = doc.lineAt(pos);
 
         if (this.shouldProvideReturnHint(line, pos)) {         
-            this.pushTypesToItems(Object.values(Types), items);
+            this.pushTypeNamesToItems(Object.values(TypeName), items);
         }
         return Promise.resolve(new CompletionList(items, false));
     }

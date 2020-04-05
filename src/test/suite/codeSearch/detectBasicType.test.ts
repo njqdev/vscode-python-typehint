@@ -1,153 +1,139 @@
 import * as assert from 'assert';
 import { getErrorMessage, TestCase } from "../common";
-import { detectBasicType } from "../../../codeSearch";
+import { CodeSearch } from "../../../codeSearch";
 
-suite('detectBasicType', function() {
+/**
+ * Tests basic type detection by CodeSearch.detectBasicType.
+ */
+suite('CodeSearch.detectType (basic types)', function() {
 
-    // Test for when false is passed to the function
-    // If this fails, tests of dependent functions might fail as well
-    test("detects type of a lone values", () => {
-        
-        const testCases: TestCase[] = [
-            { data: "2", expected: "int"},
-            { data: "True", expected: "bool"},
-            { data: "[]", expected: "list"},
-            { data: "{}", expected: "dict"},
-            { data: "(1, 2)", expected: "tuple"},
-            { data: "'str'", expected: "str"}
-        ];
-        for (const c of testCases) {
-            assert.equal(detectBasicType(c.data, false), c.expected);
-        }
-    });
-
-    test("detects ints", () => {
+    test("detects ints", async () => {
         const expected = "int";
         
         let src = "var = 11";
-        let actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        let actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
 
         src = "var = -11";
-        actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
 
         src = "var = 0b10";
-        actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
 
         src = "var = 0o10";
-        actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
 
         src = "var = 0x10";
-        actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
     });
     
     
-    test("detects floats", () => {
+    test("detects floats", async () => {
         const expected = "float";
 
         let src = "var = 12.3";
-        let actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        let actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
 
         src = "var = .3";
-        actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
 
         src = "var = -.3";
-        actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
 
         src = "var = 1 + 2 - 1 * 2 /  2.0";
-        actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
     });
 
-    test("detects complex numbers", () => {
+    test("detects complex numbers", async () => {
         const expected = "complex";
 
         let src = "var = 0+1.1-2*3/4j";
-        let actual = detectBasicType(src);
-        assert.equal(actual, expected);
+        let actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected);
 
     });
 
-    test("detects strings", () => {
+    test("detects strings", async () => {
         const expected = "str";
 
         let src = "var = 'test'";
-        let actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        let actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
 
         src = "var = \"test\"'";
-        actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
 
         src = "var = ('test')";
-        actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
 
         src = "var = '''t\nest''')";
-        actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
     });
 
-    test("detects bools", () => {
+    test("detects bools", async () => {
         const expected = "bool";
 
         let src = "var = True";
-        let actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        let actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
 
         src = "var = False";
-        actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
     });
     
-    test("detects lists", () => {
+    test("detects lists", async () => {
         const expected = "list";
 
         let src = "var = [";
-        let actual = detectBasicType(src);
-        assert.equal(actual, expected);
+        let actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected);
     });
 
-    test("detects dicts", () => {
+    test("detects dicts", async () => {
         const expected = "dict";
 
         let src = "var = {";
-        let actual = detectBasicType(src);
-        assert.equal(actual, expected);
+        let actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected);
     });
 
-    test("detects tuples", () => {
+    test("detects tuples", async () => {
         const expected = "tuple";
 
         let src = "var = ('dont return str please', 'ok')";
-        let actual = detectBasicType(src);
-        assert.equal(actual, expected);
+        let actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected);
     });
 
-    test("detects sets", () => {
+    test("detects sets", async () => {
         const expected = "set";
 
         let src = "var = {'dont return dict please'}";
-        let actual = detectBasicType(src);
-        assert.equal(actual, expected);
+        let actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected);
 
         src = "var = {1, 2}";
-        actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
 
         src = "var = {1 , 2}";
-        actual = detectBasicType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual?.typeName));
     });
     
-    test("detects type() call", () => {
+    test("detects type() call", async () => {
         const testCases: TestCase[] = [
             { data: "var = int('2')", expected: "int"},
             { data: "var = bool(true)", expected: "bool"},
@@ -158,15 +144,16 @@ suite('detectBasicType', function() {
             { data: "var = set([1])", expected: "set"}
         ];
         for (const c of testCases) {
-            assert.equal(detectBasicType(c.data), c.expected);
+            let actual = await CodeSearch.detectType(c.data, c.data);
+            assert.equal(actual?.typeName, c.expected);
         }
     });
 
-    test("ignores spaces", () => {
+    test("ignores spaces", async () => {
         const expected = "int";
 
         let src = "var       =        5";
-        let actual = detectBasicType(src);
-        assert.equal(actual, expected);
+        let actual = await CodeSearch.detectType(src, src);
+        assert.equal(actual?.typeName, expected);
     });
 });

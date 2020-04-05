@@ -4,12 +4,11 @@ export const anyTypeName: string = "[a-zA-Z_][a-zA-Z0-9_.]*";
 export const paramHintTrigger: string = ":";
 export const returnHintTrigger: string = ">";
 
-
 export class DataType {
-    name: Types;
+    name: TypeName;
     category: TypeCategory;
 
-    constructor(name: Types, category: TypeCategory) {
+    constructor(name: TypeName, category: TypeCategory) {
         this.name = name;
         this.category = category;
     }
@@ -21,23 +20,31 @@ export interface DataTypes {
 
 export const getDataTypes = (): DataTypes => {
     return {
-        bool: new DataType(Types.Bool, typeCategories.bool),
-        complex: new DataType(Types.Complex, typeCategories.complex),
-        dict: new DataType(Types.Dict, typeCategories.dict),
-        float: new DataType(Types.Float, typeCategories.float),
-        int: new DataType(Types.Int, typeCategories.int),
-        list: new DataType(Types.List, typeCategories.list),
-        object: new DataType(Types.Object, typeCategories.object),
-        set: new DataType(Types.Set, typeCategories.set),
-        str: new DataType(Types.String, typeCategories.string),
-        tuple: new DataType(Types.Tuple, typeCategories.tuple)
+        bool: new DataType(TypeName.Bool, typeCategories.bool),
+        complex: new DataType(TypeName.Complex, typeCategories.complex),
+        dict: new DataType(TypeName.Dict, typeCategories.dict),
+        float: new DataType(TypeName.Float, typeCategories.float),
+        int: new DataType(TypeName.Int, typeCategories.int),
+        list: new DataType(TypeName.List, typeCategories.list),
+        object: new DataType(TypeName.Object, typeCategories.object),
+        set: new DataType(TypeName.Set, typeCategories.set),
+        str: new DataType(TypeName.String, typeCategories.string),
+        tuple: new DataType(TypeName.Tuple, typeCategories.tuple)
     };
 };
 
 /**
+ * Ways a variable can be initialized.
+ */
+export enum Initialization {
+    WithValue,
+    WithCall
+}
+
+/**
  * Names of built-in Python types which can be hinted. 
  */
-export enum Types {
+export enum TypeName {
     Bool = "bool",
     Complex = "complex",
     Dict = "dict",
