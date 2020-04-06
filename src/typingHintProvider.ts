@@ -1,4 +1,3 @@
-import { TextDocument } from "vscode";
 import { DataType, TypeCategory } from "./python";
 import { capitalized } from "./utils";
 import { TypeHint } from "./typeHintProvider";
@@ -8,16 +7,16 @@ import { TypeHint } from "./typeHintProvider";
  */
 export class TypingHintProvider {
 
-    //private doc: TextDocument;
     private docText: string;
     private importStatement: string | null = null;
-    private typingPrefix: string = "typing";
     private fromTypingImport: boolean = false;
+    private typingPrefix: string = "typing";
 
     private typingImports: string[] = [];
 
     /**
      * Constructs a new TypeResolver.
+     * 
      * @param docText The document text to search.
      */
     constructor(docText: string) {
@@ -56,8 +55,8 @@ export class TypingHintProvider {
     }
 
     /**
-     * Get a hint for the type if typing is imported.
-     * @param type The type.
+     * Get a hint for a data type if typing is imported.
+     * @param type A {@link DataType}.
      * @returns A type hint string.
      */
     public getTypingHint(type: DataType): TypeHint | null {

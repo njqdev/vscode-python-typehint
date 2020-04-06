@@ -10,12 +10,12 @@ import {
     TextDocument
 } from "vscode";
 import { TypeHintProvider, TypeHint } from "./typeHintProvider";
-import { paramHintTrigger, returnHintTrigger, TypeName } from "./python";
+import { paramHintTrigger, returnHintTrigger, PythonType } from "./python";
 
 
 abstract class CompletionProvider {
 
-    protected pushTypeNamesToItems(typeNames: TypeName[], completionItems: CompletionItem[]) {
+    protected pushTypesToItems(typeNames: PythonType[], completionItems: CompletionItem[]) {
         for (const typeName of typeNames) {
             const item = new CompletionItem(typeName, CompletionItemKind.TypeParameter);
     
@@ -38,19 +38,25 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
         token: CancellationToken,
         context: CompletionContext
     ): Promise<CompletionList | null> {
-        if (context.triggerCharacter !== paramHintTrigger) {
-            return Promise.resolve(null);
+        if (context.triggerCharacter === paramHintTrigger) {
+            const items: CompletionItem[] = [];
+            const line = doc.lineAt(pos);
+    
+            if (this.shouldProvideItems(line, pos)) {
+                const param = this.findParam(line, pos);
+                const provider = new TypeHintProvider(doc);
+        
+                if (param && param.length > 0) {
+                    try {
+                        this.pushEstimationsToItems(await provider.getTypeHints(param), items); 
+                    } catch (error) {
+                    }     
+                }
+                this.pushTypesToItems(provider.getRemainingTypes(), items);
+                return Promise.resolve(new CompletionList(items, false));
+            }
         }
-        const items: CompletionItem[] = [];
-        const line = doc.lineAt(pos);
-        const param = this.findParam(line, pos);
-        const provider = new TypeHintProvider(doc);
-
-        if (param && param.length > 0) {     
-            this.pushEstimationsToItems(await provider.getTypeHints(param), items); 
-        }
-        this.pushTypeNamesToItems(provider.getRemainingTypes(), items);
-        return Promise.resolve(new CompletionList(items, false));
+        return Promise.resolve(null);
     }
 
     /**
@@ -69,9 +75,9 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
         return param;
     }
     
-    protected pushEstimationsToItems(typeHints: TypeHint[], items: CompletionItem[]) {
+    private pushEstimationsToItems(typeHints: TypeHint[], items: CompletionItem[]) {
 
-        if (typeHints) {
+        if (typeHints.length > 0) {
             let typeHint = typeHints[0].type;
             let item = new CompletionItem(typeHint, CompletionItemKind.TypeParameter);
             item.sortText = `0${typeHint}`;
@@ -88,6 +94,14 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
             }       
 
         }
+    }
+
+    private shouldProvideItems(line: TextLine, pos: Position): boolean {
+
+        if (pos.character > 0) {
+            return new RegExp("^[ \t]*def", "m").test(line.text);
+        }
+        return false;
     }
 }
 
@@ -108,17 +122,17 @@ export class ReturnHintCompletionProvider extends CompletionProvider implements 
         const items: CompletionItem[] = [];
         const line = doc.lineAt(pos);
 
-        if (this.shouldProvideReturnHint(line, pos)) {         
-            this.pushTypeNamesToItems(Object.values(TypeName), items);
+        if (this.shouldProvideItems(line, pos)) {         
+            this.pushTypesToItems(Object.values(PythonType), items);
         }
         return Promise.resolve(new CompletionList(items, false));
     }
 
-    private shouldProvideReturnHint(line: TextLine, pos: Position): boolean {
+    private shouldProvideItems(line: TextLine, pos: Position): boolean {
 
         if (pos.character > 0 && line.text.substr(pos.character - 2, 2) === "->") {
             
-            return new RegExp("^[*\t]*def.*\\) *->[: ]*$", "m").test(line.text);
+            return new RegExp("^[ \t]*def.*\\) *->[: ]*$", "m").test(line.text);
         }
         return false;
     }

@@ -1,35 +1,35 @@
 
-export const anyTypeName: string = "[a-zA-Z_][a-zA-Z0-9_.]*";
+export const anyClassOrFunctionName: string = "[a-zA-Z_][a-zA-Z0-9_.]*";
 
 export const paramHintTrigger: string = ":";
 export const returnHintTrigger: string = ">";
 
 export class DataType {
-    name: TypeName;
+    name: PythonType;
     category: TypeCategory;
 
-    constructor(name: TypeName, category: TypeCategory) {
+    constructor(name: PythonType, category: TypeCategory) {
         this.name = name;
         this.category = category;
     }
 }
 
-export interface DataTypes {
+export interface DataTypeContainer {
      [key: string]: DataType 
 };
 
-export const getDataTypes = (): DataTypes => {
+export const getDataTypeContainer = (): DataTypeContainer => {
     return {
-        bool: new DataType(TypeName.Bool, typeCategories.bool),
-        complex: new DataType(TypeName.Complex, typeCategories.complex),
-        dict: new DataType(TypeName.Dict, typeCategories.dict),
-        float: new DataType(TypeName.Float, typeCategories.float),
-        int: new DataType(TypeName.Int, typeCategories.int),
-        list: new DataType(TypeName.List, typeCategories.list),
-        object: new DataType(TypeName.Object, typeCategories.object),
-        set: new DataType(TypeName.Set, typeCategories.set),
-        str: new DataType(TypeName.String, typeCategories.string),
-        tuple: new DataType(TypeName.Tuple, typeCategories.tuple)
+        bool: new DataType(PythonType.Bool, typeCategories.bool),
+        complex: new DataType(PythonType.Complex, typeCategories.complex),
+        dict: new DataType(PythonType.Dict, typeCategories.dict),
+        float: new DataType(PythonType.Float, typeCategories.float),
+        int: new DataType(PythonType.Int, typeCategories.int),
+        list: new DataType(PythonType.List, typeCategories.list),
+        object: new DataType(PythonType.Object, typeCategories.object),
+        set: new DataType(PythonType.Set, typeCategories.set),
+        str: new DataType(PythonType.String, typeCategories.string),
+        tuple: new DataType(PythonType.Tuple, typeCategories.tuple)
     };
 };
 
@@ -42,9 +42,9 @@ export enum Initialization {
 }
 
 /**
- * Names of built-in Python types which can be hinted. 
+ * Built-in Python types.
  */
-export enum TypeName {
+export enum PythonType {
     Bool = "bool",
     Complex = "complex",
     Dict = "dict",
@@ -67,7 +67,7 @@ export enum TypeCategory {
 }
 
 /**
- * Type name keys with Type values. 
+ * Built-in Python type keys with Type category values. 
  */
 const typeCategories: { [key: string]: TypeCategory } = {
     bool: TypeCategory.Basic,
