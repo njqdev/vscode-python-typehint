@@ -4,6 +4,7 @@ import { TypeSearch } from "./typeSearch";
 import { TypingHintProvider } from "./typingHintProvider";
 import { WorkspaceSearcher } from "./workspaceSearcher";
 import { TypeHint, labelFor } from "./typeHint";
+import { TypeHintSettings } from "./settings";
 
 /**
  * Provides type hints.
@@ -22,14 +23,16 @@ export class TypeHintProvider {
     private typeContainer: DataTypeContainer = getDataTypeContainer();
     private typesIncludedInResult: { [key: string]: string } = {};
     private doc: TextDocument;
+    private settings: TypeHintSettings;
 
     /**
      * Constructs a new TypeHintProvider.
      * 
      * @param doc The active document.
      */
-    constructor(doc: TextDocument) {
+    constructor(doc: TextDocument, settings: TypeHintSettings) {
         this.doc = doc;
+        this.settings = settings;
     }
 
     /**
@@ -47,7 +50,7 @@ export class TypeHintProvider {
 
         const variableSearch = TypeSearch.variableWithSameName(param, documentText);
 
-        const wsSearcher = new WorkspaceSearcher(this.doc.uri);
+        const wsSearcher = new WorkspaceSearcher(this.doc.uri, this.settings);
         const wsSearch = wsSearcher.findHintOfSimilarParam(param, documentText);
 
         this.addIfNotNull(TypeSearch.classWithSameName(param, documentText), typeHints);

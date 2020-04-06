@@ -39,11 +39,21 @@
 					".py"
 				]
 			}
-		]
+        ],
+        "configuration": {
+            "title": "Python Type Hint",
+            "properties": {
+              "pyTypehint.search.limit": {
+                "type": "number",
+                "default": 30,
+                "description": "When providing type hint items, the number of files searched will be limited by this setting."
+              }
+            }
+        }
 	},
 	"scripts": {
-		"package": "npx vsce package",
-        "publish": "npx vsce publish",
+		"package": "vsce package",
+        "publish": "vsce publish",
     
         "vscode:prepublish": "webpack --mode production",
         "compile": "webpack --mode none",

@@ -12,6 +12,7 @@ import {
 import { TypeHintProvider } from "./typeHintProvider";
 import { paramHintTrigger, returnHintTrigger, PythonType } from "./python";
 import { TypeHint, labelFor } from "./typeHint";
+import { TypeHintSettings } from "./settings";
 
 
 abstract class CompletionProvider {
@@ -32,6 +33,13 @@ abstract class CompletionProvider {
  */
 export class ParamHintCompletionProvider extends CompletionProvider implements CompletionItemProvider {
 
+    private settings: TypeHintSettings;
+
+    constructor(settings: TypeHintSettings) {
+        super();
+        this.settings = settings;
+    }
+
     public async provideCompletionItems(
         doc: TextDocument, 
         pos: Position,
@@ -44,7 +52,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
     
             if (this.shouldProvideItems(line, pos)) {
                 const param = this.findParam(line, pos);
-                const provider = new TypeHintProvider(doc);
+                const provider = new TypeHintProvider(doc, this.settings);
         
                 if (param && param.length > 0) {
                     try {

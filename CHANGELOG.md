@@ -1,7 +1,5 @@
 # Change Log
 
-All notable changes to the "vscode-python-autohint" extension will be documented in this file.
+## [1.0.0]
 
-## [0.5.0]
-
-- Initial release
+* Initial release

@@ -1,4 +1,5 @@
 import { Uri, workspace } from "vscode";
+import { TypeHintSettings } from "./settings";
 import { TypeSearch } from "./typeSearch";
 
 /**
@@ -8,16 +9,16 @@ export class WorkspaceSearcher {
 
     private search: boolean = true;
     private activeDocUri: Uri;
-
-    private fileSearchLimit = 20;   // TODO: config
+    private settings: TypeHintSettings;
 
     /**
      * Constructs a new WorkspaceSearcher.
      * 
      * @param activeDocumentUri The uri of the active document.
      */
-    constructor(activeDocumentUri: Uri) {
+    constructor(activeDocumentUri: Uri, settings: TypeHintSettings) {
         this.activeDocUri = activeDocumentUri;
+        this.settings = settings;
     }
 
     /**
@@ -31,7 +32,7 @@ export class WorkspaceSearcher {
         this.search = true;
         
         if (workspace.workspaceFolders) {
-            const uris = (await workspace.findFiles("**/*.py", null, this.fileSearchLimit))
+            const uris = (await workspace.findFiles("**/*.py", null, this.settings.fileSearchLimit))
                 .filter(u => u.path !== this.activeDocUri.path);
 
             for (let i = 0; this.search && i < uris.length; i++) {
