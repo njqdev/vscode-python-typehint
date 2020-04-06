@@ -1,17 +1,18 @@
 # vscode-python-autohint README
 
-This extension provides type hint autocompletion for Python.
-
-## Features
-
-* Estimates the correct type to provide as an autocompletion item.
+Provides type hint auto-completion for Python.
 
 ![](demo.gif)
 
+## Features
+
+* Estimates the correct type to provide as a completion item.
+
+* Searches Python files in the workspace for type estimation purposes.
 
 ## Installation
 
-The extension is not published yet.
+Get this extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=).
 
 ## Known Issues
 

@@ -3,14 +3,7 @@ import { PythonType as PythonType, DataTypeContainer, getDataTypeContainer } fro
 import { TypeSearch } from "./typeSearch";
 import { TypingHintProvider } from "./typingHintProvider";
 import { WorkspaceSearcher } from "./workspaceSearcher";
-
-/**
- * A type hint to build a {@link CompletionItem} with.
- */
-export interface TypeHint {
-    type: string;
-    insertText?: string;
-}
+import { TypeHint, labelFor } from "./typeHint";
 
 /**
  * Provides type hints.
@@ -99,15 +92,6 @@ export class TypeHintProvider {
     }
 
     /**
-     * Get insertText for a type hint.
-     * 
-     * @param typeName The type name to format as insertText.
-     */
-    public static insertTextFor(typeName: string) {
-        return " " + typeName;
-    }
-
-    /**
      * If the param ends with a type name, the type is returned.
      * @param param The parameter name.
      * @param prefix A prefix before the typename. For example, a param named x{prefix}list will return 'list'.
@@ -161,15 +145,15 @@ export class TypeHintProvider {
 
     private add(type: string, typeHints: TypeHint[]) {
         if (this.typeNotIncluded(type)) {
-            typeHints.push({ type, insertText: TypeHintProvider.insertTextFor(type) });
+            typeHints.push({ label: labelFor(type) });
             this.typesIncludedInResult[type] = type;
         }
     }
     
     private addTypeHintIfNotNull(hint: TypeHint | null, typeHints: TypeHint[]) {
-        if (hint && this.typeNotIncluded(hint.type)) {
+        if (hint && this.typeNotIncluded(hint.label)) {
             typeHints.push(hint);
-            this.typesIncludedInResult[hint.type] = hint.type;
+            this.typesIncludedInResult[hint.label] = hint.label;
         }
     }
 

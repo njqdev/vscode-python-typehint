@@ -9,19 +9,19 @@ import {
     TextLine,
     TextDocument
 } from "vscode";
-import { TypeHintProvider, TypeHint } from "./typeHintProvider";
+import { TypeHintProvider } from "./typeHintProvider";
 import { paramHintTrigger, returnHintTrigger, PythonType } from "./python";
+import { TypeHint, labelFor } from "./typeHint";
 
 
 abstract class CompletionProvider {
 
     protected pushTypesToItems(typeNames: PythonType[], completionItems: CompletionItem[]) {
         for (const typeName of typeNames) {
-            const item = new CompletionItem(typeName, CompletionItemKind.TypeParameter);
+            const item = new CompletionItem(labelFor(typeName), CompletionItemKind.TypeParameter);
     
             // Add 999 to ensure they're sorted to the bottom of the CompletionList.
             item.sortText = `999${typeName}`;
-            item.insertText = TypeHintProvider.insertTextFor(typeName);   
             completionItems.push(item);
         }
     }
@@ -78,7 +78,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
     private pushEstimationsToItems(typeHints: TypeHint[], items: CompletionItem[]) {
 
         if (typeHints.length > 0) {
-            let typeHint = typeHints[0].type;
+            let typeHint = typeHints[0].label;
             let item = new CompletionItem(typeHint, CompletionItemKind.TypeParameter);
             item.sortText = `0${typeHint}`;
             item.preselect = true;
@@ -86,7 +86,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
             items.push(item);
 
             for (let i = 1; i < typeHints.length; i++) {
-                typeHint = typeHints[i].type;
+                typeHint = typeHints[i].label;
                 item = new CompletionItem(typeHint, CompletionItemKind.TypeParameter);
                 item.sortText = `${i}${typeHint}`;
                 item.insertText = typeHints[i].insertText;

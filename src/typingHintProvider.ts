@@ -1,6 +1,6 @@
 import { DataType, TypeCategory } from "./python";
 import { capitalized } from "./utils";
-import { TypeHint } from "./typeHintProvider";
+import { TypeHint, labelFor } from "./typeHint";
 
 /**
  * Provides type hints for the Python typing module.
@@ -15,7 +15,7 @@ export class TypingHintProvider {
     private typingImports: string[] = [];
 
     /**
-     * Constructs a new TypeResolver.
+     * Constructs a new TypingHintProvider.
      * 
      * @param docText The document text to search.
      */
@@ -23,8 +23,10 @@ export class TypingHintProvider {
         this.docText = docText;
     }
 
-
-    public async containsTyping() {
+    /**
+     * Determines if this object's document contains a typing import.
+     */
+    public async containsTyping(): Promise<boolean> {
         let m = new RegExp(
             `^[ \t]*from typing import +([a-zA-Z_][a-zA-Z0-9_-]+)`,
             "m"
@@ -65,9 +67,12 @@ export class TypingHintProvider {
         if (type.category === TypeCategory.Collection && this.importStatement) {
 
             if (this.fromTypingImport && this.typingImports.includes(typingName)) {
-                return { type: typingName, insertText: ` ${typingName}[` };
+                return { label: labelFor(typingName), insertText: ` ${typingName}[` };
             }
-            return { type: `${this.typingPrefix}.${typingName}`, insertText: ` ${this.typingPrefix}.${typingName}[` };
+            return {
+                label: labelFor(`${this.typingPrefix}.${typingName}`),
+                insertText: ` ${this.typingPrefix}.${typingName}[`
+            };
         }
         return null;
     }

@@ -9,7 +9,7 @@ export class WorkspaceSearcher {
     private search: boolean = true;
     private activeDocUri: Uri;
 
-    private fileSearchLimit = 150;   // TODO: config
+    private fileSearchLimit = 20;   // TODO: config
 
     /**
      * Constructs a new WorkspaceSearcher.
