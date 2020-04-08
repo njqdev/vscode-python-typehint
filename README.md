@@ -22,7 +22,7 @@ If 0, only the current editor document is searched, which increases speed but ca
 
 ## Installation
 
-The extension can be installed manually with a [VSIX file]https://github.com/nj-q/vscode-python-typehint/releases/tag/v1.0.0.
+The extension can be installed manually with this [VSIX file](https://github.com/nj-q/vscode-python-typehint/releases/tag/v1.0.0).
 
 ## Known Issues
 
