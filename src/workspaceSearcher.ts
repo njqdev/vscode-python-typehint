@@ -30,9 +30,10 @@ export class WorkspaceSearcher {
      */
     public async findHintOfSimilarParam(param: string, activeDocumentText: string): Promise<string | null> {
         this.search = true;
-        
-        if (workspace.workspaceFolders) {
-            const uris = (await workspace.findFiles("**/*.py", null, this.settings.fileSearchLimit))
+        const maxResults = this.settings.fileSearchLimit;
+
+        if (maxResults > 0 && workspace.workspaceFolders) {
+            const uris = (await workspace.findFiles("**/*.py", null, maxResults))
                 .filter(u => u.path !== this.activeDocUri.path);
 
             for (let i = 0; this.search && i < uris.length; i++) {
@@ -52,7 +53,7 @@ export class WorkspaceSearcher {
     /**
      * Stops all searches.
      */
-    public stopSearches() {
+    public cancel() {
         this.search = false;
     }
 }

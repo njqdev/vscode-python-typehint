@@ -2,7 +2,7 @@ import { workspace, Event, EventEmitter, window } from "vscode";
 
 export class TypeHintSettings {
 
-    private searchLimit = 50;
+    private searchLimit = 20;
 
     public get fileSearchLimit() {
         return this.searchLimit;
@@ -24,9 +24,9 @@ export class TypeHintSettings {
     }
 
     private initialize() {
-        const searchLimit: number | undefined = workspace.getConfiguration('pyTypehint.search').get('limit');
+        const searchLimit: number | undefined = workspace.getConfiguration('workspace.search').get('limit');
         if (searchLimit) {
-            this.searchLimit = searchLimit;
+            this.searchLimit = Number.isInteger(searchLimit) ? searchLimit : Math.round(searchLimit);
         }
     }
 

@@ -7,10 +7,11 @@ import {
     CompletionItemProvider,
     Position,
     TextLine,
-    TextDocument
+    TextDocument,
+    Range
 } from "vscode";
 import { TypeHintProvider } from "./typeHintProvider";
-import { paramHintTrigger, returnHintTrigger, PythonType } from "./python";
+import { paramHintTrigger, returnHintTrigger, PythonType, anyClassOrFunctionName } from "./python";
 import { TypeHint, labelFor } from "./typeHint";
 import { TypeHintSettings } from "./settings";
 
@@ -49,12 +50,13 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
         if (context.triggerCharacter === paramHintTrigger) {
             const items: CompletionItem[] = [];
             const line = doc.lineAt(pos);
-    
-            if (this.shouldProvideItems(line, pos)) {
-                const param = this.findParam(line, pos);
+            const precedingText = line.text.substring(0, pos.character - 1).trim();
+
+            if (this.shouldProvideItems(precedingText, pos, doc)) {
+                const param: string = this.findParam(precedingText, pos);
                 const provider = new TypeHintProvider(doc, this.settings);
         
-                if (param && param.length > 0) {
+                if (param.length > 0) {
                     try {
                         this.pushEstimationsToItems(await provider.getTypeHints(param), items); 
                     } catch (error) {
@@ -70,17 +72,21 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
     /**
      * Finds the parameter which is about to be type hinted.
      * 
-     * @param line The active line.
+     * @param precedingText Text preceding the active position.
      * @param pos The active position.
+     * @returns The parameter.
      */
-    private findParam(line: TextLine, pos: Position): string | null {
-        let param = null;
-        let split = line.text.substr(0, pos.character).split(new RegExp("[,(]"));
-        if (split.length > 1) {
-            param = split[split.length - 1].trim();
-            param = param.substr(0, param.length - 1);
+    private findParam(precedingText: string, pos: Position): string {
+        let param = "";
+
+        let i = precedingText.length - 1;
+        let last = precedingText[i];
+        while (last !== "," && last !== "(" && i >= 0) {
+            param = precedingText[i] + param;
+            i--;
+            last = precedingText[i];
         }
-        return param;
+        return param.trim();
     }
     
     private pushEstimationsToItems(typeHints: TypeHint[], items: CompletionItem[]) {
@@ -100,16 +106,35 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
                 item.insertText = typeHints[i].insertText;
                 items.push(item);
             }       
-
         }
     }
 
-    private shouldProvideItems(line: TextLine, pos: Position): boolean {
+    private shouldProvideItems(precedingText: string, activePos: Position, doc: TextDocument): boolean {
 
-        if (pos.character > 0) {
-            return new RegExp("^[ \t]*def", "m").test(line.text);
+        if (activePos.character > 0 && !this.isInvalid(precedingText)) {
+            let provide = new RegExp("^[ \t]*def", "m").test(precedingText);
+
+            if (!provide) {
+                const nLinesToCheck = activePos.character > 4 ? 4 : activePos.line;
+                const range = new Range(doc.lineAt(activePos.line - nLinesToCheck).range.start, activePos);
+                provide = new RegExp(
+                    `^[ \t]*def(?![\s\S]+(\\):|-> *${anyClassOrFunctionName}:))`,
+                    "m"
+                ).test(doc.getText(range));
+            }
+            return provide;
         }
         return false;
+    }
+
+    /**
+     * The text is invalid if it is a comment, dict or the end of the function definition.
+     */
+    private isInvalid(precedingText: string): boolean {
+        if (precedingText) {
+            return new RegExp("#|\\)$|{ *[a-zA-Z0-9.+*/\\(\\)-]+$").test(precedingText);
+        }
+        return true;
     }
 }
 
@@ -139,8 +164,8 @@ export class ReturnHintCompletionProvider extends CompletionProvider implements 
     private shouldProvideItems(line: TextLine, pos: Position): boolean {
 
         if (pos.character > 0 && line.text.substr(pos.character - 2, 2) === "->") {
-            
-            return new RegExp("^[ \t]*def.*\\) *->[: ]*$", "m").test(line.text);
+
+            return new RegExp("\\) *->[: ]*$", "m").test(line.text);
         }
         return false;
     }

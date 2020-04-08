@@ -1,6 +1,6 @@
 import { TextDocument } from "vscode";
 import { PythonType as PythonType, DataTypeContainer, getDataTypeContainer } from "./python";
-import { TypeSearch } from "./typeSearch";
+import { TypeSearch, VariableSearchResult } from "./typeSearch";
 import { TypingHintProvider } from "./typingHintProvider";
 import { WorkspaceSearcher } from "./workspaceSearcher";
 import { TypeHint, labelFor } from "./typeHint";
@@ -42,25 +42,26 @@ export class TypeHintProvider {
      * @returns An array of type hints, ordered by estimation accuracy.
      */
     public async getTypeHints(param: string): Promise<TypeHint[]> {
-        const documentText = this.doc.getText();
         const typeHints: TypeHint[] = [];
+        const documentText = this.doc.getText();
 
-        const typingHintProvider = new TypingHintProvider(documentText);
+        const typingHintProvider = new TypingHintProvider(documentText, this.typeContainer);
         const typingSearch = typingHintProvider.containsTyping();
 
         const variableSearch = TypeSearch.variableWithSameName(param, documentText);
 
         const wsSearcher = new WorkspaceSearcher(this.doc.uri, this.settings);
-        const wsSearch = wsSearcher.findHintOfSimilarParam(param, documentText);
+        const workspaceSearch = wsSearcher.findHintOfSimilarParam(param, documentText);
 
-        this.addIfNotNull(TypeSearch.classWithSameName(param, documentText), typeHints);
-        this.addIfNotNull(TypeSearch.hintOfSimilarParam(param, documentText), typeHints);
+        this.tryAdd(TypeSearch.classWithSameName(param, documentText), typeHints);
+        this.tryAdd(TypeSearch.hintOfSimilarParam(param, documentText), typeHints);
 
-        let typeName = this.getTypeWithinParam(param, "_");
+        let typeName = this.getTypeParamEndsWith(param, "_");
         if (typeName) {
             this.add(typeName, typeHints);
             this.tryAddTypingHint(await typingSearch, typeName, typingHintProvider, typeHints);
-            wsSearcher.stopSearches();
+            wsSearcher.cancel();
+            await workspaceSearch;
             return typeHints;
         }
 
@@ -68,13 +69,16 @@ export class TypeHintProvider {
 
         if (searchResult !== null && !TypeSearch.invalidTernaryOperator(searchResult)) {
             this.add(searchResult.typeName, typeHints);
-            this.tryAddTypingHint(await typingSearch, searchResult.typeName, typingHintProvider, typeHints);
+            this.tryAddTypingHints(await typingSearch, searchResult, typingHintProvider, typeHints);
+            this.tryAdd(this.typeGuessFor(param, typeHints), typeHints);
+        } else if (typeName = this.getTypeParamEndsWith(param, "")) {
+            this.add(typeName, typeHints);
+            this.tryAddTypingHint(await typingSearch, typeName, typingHintProvider, typeHints);
         } else {
-            this.addIfNotNull(this.getTypeWithinParam(param, ""), typeHints);
+            this.tryAdd(this.typeGuessFor(param, typeHints), typeHints);
         }
 
-        this.addIfNotNull(this.typeGuessFor(param, typeHints), typeHints);
-        this.addIfNotNull(await wsSearch, typeHints);
+        this.tryAdd(await workspaceSearch, typeHints);
         return typeHints;
     }
     
@@ -99,7 +103,7 @@ export class TypeHintProvider {
      * @param param The parameter name.
      * @param prefix A prefix before the typename. For example, a param named x{prefix}list will return 'list'.
      */
-    private getTypeWithinParam(param: string, prefix: string): PythonType | null {
+    private getTypeParamEndsWith(param: string, prefix: string): PythonType | null {
         const paramUpper = param.toUpperCase();
 
         for (const type of this.likelyTypes) {
@@ -129,17 +133,34 @@ export class TypeHintProvider {
         return null;
     }
     
+    private tryAddTypingHints(
+        typingFound: boolean,
+        searchResult: VariableSearchResult | null,
+        typingHintProvider: TypingHintProvider,
+        typeHints: TypeHint[]
+    ) {
+        if (typingFound) {
+            const hints: TypeHint[] | null = typingHintProvider.getTypingHints(searchResult);
+            if (hints) {
+                for (const hint of hints) {
+                    this.addTypeHint(hint, typeHints);
+                }
+            }
+        }
+    }
+
     private tryAddTypingHint(
-        typingImported: boolean,
+        typingFound: boolean,
         typeName: string,
         typingHintProvider: TypingHintProvider,
         typeHints: TypeHint[]
-    ): boolean {
-        if (typingImported && typeName in this.typeContainer) {
-            this.addTypeHintIfNotNull(typingHintProvider.getTypingHint(this.typeContainer[typeName]), typeHints);
-            return true;
+    ) {
+        if (typingFound) {
+            const typingHint = typingHintProvider.getTypingHint(typeName);
+            if (typingHint) {
+                this.addTypeHint(typingHint, typeHints);
+            }
         }
-        return false;
     }
 
     private typeNotIncluded(type: string): boolean {
@@ -153,14 +174,14 @@ export class TypeHintProvider {
         }
     }
     
-    private addTypeHintIfNotNull(hint: TypeHint | null, typeHints: TypeHint[]) {
-        if (hint && this.typeNotIncluded(hint.label)) {
+    private addTypeHint(hint: TypeHint, typeHints: TypeHint[]) {
+        if (this.typeNotIncluded(hint.label)) {
             typeHints.push(hint);
             this.typesIncludedInResult[hint.label] = hint.label;
         }
     }
 
-    private addIfNotNull(type: string | null, typeHints: TypeHint[]) {
+    private tryAdd(type: string | null, typeHints: TypeHint[]) {
         if (type) {
             this.add(type, typeHints);
         }

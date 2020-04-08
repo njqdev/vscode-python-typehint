@@ -4,6 +4,9 @@ export const anyClassOrFunctionName: string = "[a-zA-Z_][a-zA-Z0-9_.]*";
 export const paramHintTrigger: string = ":";
 export const returnHintTrigger: string = ">";
 
+/**
+ * A built-in Python type.
+ */
 export class DataType {
     name: PythonType;
     category: TypeCategory;
@@ -34,15 +37,7 @@ export const getDataTypeContainer = (): DataTypeContainer => {
 };
 
 /**
- * Ways a variable can be initialized.
- */
-export enum Initialization {
-    WithValue,
-    WithCall
-}
-
-/**
- * Built-in Python types.
+ * Names of built-in Python types.
  */
 export enum PythonType {
     Bool = "bool",

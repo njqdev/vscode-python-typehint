@@ -6,11 +6,6 @@ import { TypeHintSettings } from './settings';
 // Called when the extension is activated.
 export function activate(context: vscode.ExtensionContext) {
 
-    // Not used yet
-	function registerCommand(commandId: string, func: (...args: any[]) => void): void {
-		context.subscriptions.push(vscode.commands.registerCommand(commandId, func));
-    }
-
     const settings = new TypeHintSettings();
 
     context.subscriptions.push(
