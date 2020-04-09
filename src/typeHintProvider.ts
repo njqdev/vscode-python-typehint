@@ -28,6 +28,7 @@ export class TypeHintProvider {
      * Constructs a new TypeHintProvider.
      * 
      * @param doc The active document.
+     * @param settings User settings.
      */
     constructor(doc: TextDocument, settings: TypeHintSettings) {
         this.doc = doc;

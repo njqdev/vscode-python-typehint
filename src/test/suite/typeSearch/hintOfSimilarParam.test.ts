@@ -9,7 +9,7 @@ suite('CodeSearch.hintOfSimilarParam', function() {
         const param = "test";
         let src = `def func(${param}: str):\ndef test(self, ${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected);
     });
 
     test("finds param with preceding parameters", () => {
@@ -18,7 +18,7 @@ suite('CodeSearch.hintOfSimilarParam', function() {
 
         let src = `def func(self, p1: int,${param}: str):\ndef test(self, ${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected);
     });
     
     test("finds param with trailing parameters", () => {
@@ -27,7 +27,7 @@ suite('CodeSearch.hintOfSimilarParam', function() {
 
         let src = `def func(self, ${param}: str,new: int):\ndef test(self, ${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected);
     });
 
     test("handles line breaks in function definition", () => {
@@ -36,7 +36,7 @@ suite('CodeSearch.hintOfSimilarParam', function() {
 
         let src = `def func(\n\t${param}: str,new: int):\ndef test(self, ${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected);
     });
 
     test("doesn't match param name within other text", () => {
@@ -45,7 +45,7 @@ suite('CodeSearch.hintOfSimilarParam', function() {
 
         let src = `def func(text${param}: str,new: int):\ndef test(self, text${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected);
     });
 
     test("excludes default values", () => {
@@ -54,6 +54,6 @@ suite('CodeSearch.hintOfSimilarParam', function() {
 
         let src = `def func(${param}: str = 'exclude',new: int):\ndef test(self, text${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected);
     });
 });

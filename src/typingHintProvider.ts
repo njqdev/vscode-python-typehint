@@ -17,6 +17,7 @@ export class TypingHintProvider {
      * Constructs a new TypingHintProvider.
      * 
      * @param docText The document text to search.
+     * @param typeContainer A container with built-in Python types.
      */
     constructor(docText: string, typeContainer: DataTypeContainer) {
         this.docText = docText;
@@ -25,6 +26,8 @@ export class TypingHintProvider {
 
     /**
      * Determines if this object's document contains a typing import.
+     * 
+     * @returns True if typing is imported.
      */
     public async containsTyping(): Promise<boolean> {
         let m = new RegExp(

@@ -1,5 +1,8 @@
-import { workspace, Event, EventEmitter, window } from "vscode";
+import { workspace, Event, EventEmitter } from "vscode";
 
+/**
+ * Container of user settings.
+ */
 export class TypeHintSettings {
 
     private searchLimit = 20;

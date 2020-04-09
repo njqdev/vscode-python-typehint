@@ -17,6 +17,9 @@ export class DataType {
     }
 }
 
+/**
+ * Container with type name keys and data type values.
+ */
 export interface DataTypeContainer {
      [key: string]: DataType 
 };

@@ -9,23 +9,23 @@ suite('CodeSearch.detectType', function() {
         
         let src = "11";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = "-11";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = "0b10";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = "0o10";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = "0x10";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
     });
     
     
@@ -34,19 +34,19 @@ suite('CodeSearch.detectType', function() {
 
         let src = "12.3";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = ".3";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = "-.3";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = "1 + 2 - 1 * 2 /  2.0";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
     });
 
     test("detects complex numbers", async () => {
@@ -63,19 +63,19 @@ suite('CodeSearch.detectType', function() {
 
         let src = "'test'";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = "\"test\"'";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = "('test')";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = "'''t\nest''')";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
     });
 
     test("detects bools", async () => {
@@ -83,11 +83,11 @@ suite('CodeSearch.detectType', function() {
 
         let src = "True";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = "False";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
     });
     
     test("detects lists", async () => {
@@ -103,15 +103,15 @@ suite('CodeSearch.detectType', function() {
 
         let src = "{ 5: 'j'}";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = "{ (1,2): (3) }";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = "{'':11}";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
     });
 
     test("detects tuples", async () => {
@@ -119,11 +119,11 @@ suite('CodeSearch.detectType', function() {
 
         let src = "('dont return str please', 'ok')";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = " ( '4' , '5' )";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
     });
 
     test("detects sets", async () => {
@@ -135,14 +135,14 @@ suite('CodeSearch.detectType', function() {
 
         src = "{1, 2}";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = "{1 , 2}";
         actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
     });
     
-    test("detects type() call", async () => {
+    test("detects type() call", () => {
         const testCases: TestCase[] = [
             { data: "int('2')", expected: "int"},
             { data: "bool(true)", expected: "bool"},
@@ -153,7 +153,7 @@ suite('CodeSearch.detectType', function() {
             { data: "set([1])", expected: "set"}
         ];
         for (const c of testCases) {
-            let actual = await TypeSearch.detectType(c.data);
+            let actual = TypeSearch.detectType(c.data);
             assert.equal(actual, c.expected);
         }
     });
@@ -176,7 +176,7 @@ suite('CodeSearch.variableWithSameName', function() {
         let param = "var";
         let actual = await TypeSearch.variableWithSameName(param, src);
 
-        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual?.typeName, expected, getErrorMessage({ data: src, expected }, actual));
     });
 
     test("detects variable types if initialized in the document", async () => {
@@ -187,12 +187,12 @@ suite('CodeSearch.variableWithSameName', function() {
         let src = `${line}\n\ndef main():\n\tx = 5`;
         let param = "var";
         let actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual?.typeName, expected, getErrorMessage({ data: src, expected }, actual));
 
         // Variable with the same name initialized below
         src = `x = 5\n${line}`;
         actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual?.typeName, expected, getErrorMessage({ data: src, expected }, actual));
     });
 
     test("considers value to be an object initializtion if title case", async () => {
@@ -200,12 +200,12 @@ suite('CodeSearch.variableWithSameName', function() {
         let src = `var = ${expected}(x)`;
         let param = "var";
         let actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual?.typeName, expected, getErrorMessage({ data: src, expected }, actual));
 
         expected = "test.test.TestClass";
         src = `var = ${expected}(x)`;
         actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual?.typeName, expected, getErrorMessage({ data: src, expected }, actual));
     });
 
     test("returns null for title case functions (if the function is defined in the document)", async () => {
@@ -215,7 +215,7 @@ suite('CodeSearch.variableWithSameName', function() {
         let src = `def Func(x):\n\tpass\n\n${line}`;
         let param = "var";
         let actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual?.typeName, expected, getErrorMessage({ data: src, expected }, actual));
     });
 
     test("detects function return values if type hinted", async () => {
@@ -223,11 +223,11 @@ suite('CodeSearch.variableWithSameName', function() {
         let src = "def test() -> int:\n\treturn 1\n\nvar = test()";
         let param = "var";
         let actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual?.typeName, expected, getErrorMessage({ data: src, expected }, actual));
 
         src = "def test(self) -> int:\n\treturn 1\n\nvar = cls.test()";
         actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual?.typeName, expected, getErrorMessage({ data: src, expected }, actual));
     });
     
     test("doesn't consider function calls to be variables", async () => {
@@ -235,7 +235,7 @@ suite('CodeSearch.variableWithSameName', function() {
         let src = `obj = call()`;
         let param = "var";
         let actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual?.typeName, expected, getErrorMessage({ data: src, expected }, actual));
     });
 
     test("ignores single-line comments", async () => {
@@ -244,6 +244,6 @@ suite('CodeSearch.variableWithSameName', function() {
         let src = `# obj = 5\n${line}`;
         let param = "var";
         let actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual?.typeName, expected, getErrorMessage({ data: src, expected }, actual));
     });
 });

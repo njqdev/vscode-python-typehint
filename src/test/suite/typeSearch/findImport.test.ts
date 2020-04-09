@@ -37,12 +37,12 @@ suite('CodeSearch.findImport', function() {
         let expected = "Type";
         let src = "from module import " + expected;
         let actual = TypeSearch.findImport(detectedType, src, false);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
 
         detectedType = "package.x.y_test.Type";
         src = "from package.x.y_test import " + expected;
         actual = TypeSearch.findImport(detectedType, src, false);
-        assert.equal(actual, expected, getErrorMessage(src, expected, actual));
+        assert.equal(actual, expected, getErrorMessage({ data: src, expected }, actual));
     });
 
     test("object.Type --> returns object.Type for from X import object", () => {

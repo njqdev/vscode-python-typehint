@@ -15,6 +15,7 @@ export class WorkspaceSearcher {
      * Constructs a new WorkspaceSearcher.
      * 
      * @param activeDocumentUri The uri of the active document.
+     * @param settings User settings.
      */
     constructor(activeDocumentUri: Uri, settings: TypeHintSettings) {
         this.activeDocUri = activeDocumentUri;
@@ -25,7 +26,7 @@ export class WorkspaceSearcher {
      * Searches documents, excluding the active one, for a previously hinted parameter with the same name.
      * 
      * @param param The parameter name.
-     * @param documentText The source code of the active document.
+     * @param activeDocumentText The source code of the active document.
      * @returns The type of the found parameter or null.
      */
     public async findHintOfSimilarParam(param: string, activeDocumentText: string): Promise<string | null> {

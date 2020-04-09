@@ -27,7 +27,6 @@ export class VariableSearchResult {
 }
 
 export class TypeSearch {
-
     
     /**
      * Searches for a class with the same name as object and returns the name if found.
@@ -84,14 +83,12 @@ export class TypeSearch {
 
                 const hintedCallMatch = regExp.exec(documentText);
 
-                if (hintedCallMatch) {
-                    if (hintedCallMatch.length === 2) {
-                        return new VariableSearchResult(
-                            hintedCallMatch[1],
-                            EstimationSource.FunctionDefinition,
-                            valueAssignment
-                        );
-                    }
+                if (hintedCallMatch && hintedCallMatch.length === 2) {
+                    return new VariableSearchResult(
+                        hintedCallMatch[1],
+                        EstimationSource.FunctionDefinition,
+                        valueAssignment
+                    );
                 }
             }
             return null;
@@ -110,7 +107,7 @@ export class TypeSearch {
         return null;
     }
 
-        /**
+    /**
      * Detects the type of a value, if it is a built in Python type.
      * 
      * @returns The type name or null if not found.
@@ -226,8 +223,6 @@ export class TypeSearch {
 
     /**
      * Detects if an object is imported.
-     * 
-     * @returns The imported value.
      */
     private static isImported(object: string, documentText: string, checkForAsImports: boolean = true): boolean {
 

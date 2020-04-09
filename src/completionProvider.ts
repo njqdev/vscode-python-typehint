@@ -75,7 +75,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
     /**
      * Finds the parameter which is about to be type hinted.
      * 
-     * @param precedingText Text preceding the active position.
+     * @param precedingText The text before the active position.
      * @returns The parameter.
      */
     private findParam(precedingText: string): string {

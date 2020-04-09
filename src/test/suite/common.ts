@@ -1,11 +1,10 @@
 
 
 export const getErrorMessage = (
-    testCase: string,
-    expected: any,
+    testCase: TestCase,
     actual: any
 ): string => {
-   return `${actual} == ${expected}. \n[Test case]: ${testCase}`;
+   return `${actual} == ${testCase.expected}. \n[Test data]: ${testCase.data}`;
 };
 
 export interface TestCase {
