@@ -138,9 +138,9 @@ export class TypeSearch {
             }
         }
         searches.pop();
-        for (const e of searches) {
-            const typeName = e[0];
-            if (new RegExp(e[2]).test(value)) {
+        for (const s of searches) {
+            const typeName = s[0];
+            if (new RegExp(s[2]).test(value)) {
                 return typeName;
             }
         }

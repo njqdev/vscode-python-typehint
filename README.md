@@ -2,7 +2,8 @@
 
 Provides type hint auto-completion for Python, with completion items for built-in types, classes and the typing module.
 
-![](demo.gif)
+
+![](static/demo.gif)
 
 ## Features
 
@@ -20,7 +21,7 @@ Provides type hint auto-completion for Python, with completion items for built-i
 
 ## Installation
 
-The extension can be installed manually with this [VSIX file](https://github.com/nj-q/vscode-python-typehint/releases/tag/v1.0.0).
+The extension can found on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=njqdev.vscode-python-typehint).
 
 ## Known Issues
 

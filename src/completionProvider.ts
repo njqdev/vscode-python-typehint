@@ -12,7 +12,6 @@ import {
 } from "vscode";
 import { TypeHintProvider } from "./typeHintProvider";
 import { paramHintTrigger, returnHintTrigger, PythonType, anyClassOrFunctionName } from "./python";
-import { TypeHint, labelFor } from "./typeHint";
 import { TypeHintSettings } from "./settings";
 
 
@@ -20,12 +19,16 @@ abstract class CompletionProvider {
 
     protected pushTypesToItems(typeNames: PythonType[], completionItems: CompletionItem[]) {
         for (const typeName of typeNames) {
-            const item = new CompletionItem(labelFor(typeName), CompletionItemKind.TypeParameter);
+            const item = new CompletionItem(this.labelFor(typeName), CompletionItemKind.TypeParameter);
     
             // Add 999 to ensure they're sorted to the bottom of the CompletionList.
             item.sortText = `999${typeName}`;
             completionItems.push(item);
         }
+    }
+
+    protected labelFor(typeName: string): string {
+        return " " + typeName;
     }
 }
 
@@ -53,7 +56,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
             const precedingText = line.text.substring(0, pos.character - 1).trim();
 
             if (this.shouldProvideItems(precedingText, pos, doc)) {
-                const param: string = this.findParam(precedingText, pos);
+                const param: string = this.findParam(precedingText);
                 const provider = new TypeHintProvider(doc, this.settings);
         
                 if (param.length > 0) {
@@ -73,10 +76,9 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
      * Finds the parameter which is about to be type hinted.
      * 
      * @param precedingText Text preceding the active position.
-     * @param pos The active position.
      * @returns The parameter.
      */
-    private findParam(precedingText: string, pos: Position): string {
+    private findParam(precedingText: string): string {
         let param = "";
 
         let i = precedingText.length - 1;
@@ -89,21 +91,17 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
         return param.trim();
     }
     
-    private pushEstimationsToItems(typeHints: TypeHint[], items: CompletionItem[]) {
+    private pushEstimationsToItems(typeHints: string[], items: CompletionItem[]) {
 
         if (typeHints.length > 0) {
-            let typeHint = typeHints[0].label;
-            let item = new CompletionItem(typeHint, CompletionItemKind.TypeParameter);
-            item.sortText = `0${typeHint}`;
+            let item = new CompletionItem(this.labelFor(typeHints[0]), CompletionItemKind.TypeParameter);
+            item.sortText = `0${typeHints[0]}`;
             item.preselect = true;
-            item.insertText = typeHints[0].insertText;
             items.push(item);
 
             for (let i = 1; i < typeHints.length; i++) {
-                typeHint = typeHints[i].label;
-                item = new CompletionItem(typeHint, CompletionItemKind.TypeParameter);
-                item.sortText = `${i}${typeHint}`;
-                item.insertText = typeHints[i].insertText;
+                item = new CompletionItem(this.labelFor(typeHints[i]), CompletionItemKind.TypeParameter);
+                item.sortText = `${i}${typeHints[i]}`;
                 items.push(item);
             }       
         }

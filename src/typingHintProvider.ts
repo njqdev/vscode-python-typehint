@@ -1,6 +1,5 @@
-import { DataType, TypeCategory, PythonType, DataTypeContainer } from "./python";
+import { TypeCategory, PythonType, DataTypeContainer } from "./python";
 import { capitalized } from "./utils";
-import { TypeHint, labelFor } from "./typeHint";
 import { VariableSearchResult, TypeSearch } from "./typeSearch";
 
 /**
@@ -61,10 +60,10 @@ export class TypingHintProvider {
      * @param type A type name.
      * @returns A type hint without a closing bracket, for example 'List[ '.
      */
-    public getTypingHint(typeName: string): TypeHint | null {
+    public getTypingHint(typeName: string): string | null {
         const type = this.typeContainer[typeName];
         if (type.category === TypeCategory.Collection) {
-            return this.createHint(type.name);
+            return this.toTypingString(type.name);
         }
         return null;
     }
@@ -73,13 +72,13 @@ export class TypingHintProvider {
      * Get hints if typing is imported.
      * 
      * @param searchResult A search result to derive hints from.
-     * @returns One or two TypeHints. For example, 'List[' and 'List[str]'.
+     * @returns One or two type hints. For example, 'List[' and 'List[str]'.
      */
-    public getTypingHints(searchResult: VariableSearchResult | null): TypeHint[] | null {
+    public getTypingHints(searchResult: VariableSearchResult | null): string[] | null {
         if (searchResult && searchResult.typeName in this.typeContainer) {
             const type = this.typeContainer[searchResult.typeName];
-            const result: TypeHint[] = [ this.createHint(type.name)];
-            let label = result[0].label;
+            const result: string[] = [ this.toTypingString(type.name)];
+            let label = result[0];
 
             if (type.category === TypeCategory.Collection) {
 
@@ -97,7 +96,7 @@ export class TypingHintProvider {
                     if (this.typeContainer[elementType].name === PythonType.Dict) {
                         dictElementFound = true;
                     }
-                    label += this.typingString(elementType);
+                    label += this.toTypingString(elementType);
                     elementValue = elementValue.trim().substr(1);
                     elementType = TypeSearch.detectType(elementValue);
                     collectionCount++;
@@ -109,25 +108,21 @@ export class TypingHintProvider {
                     // Detecting the type of dict values here isn't supported, so let the user add them
                     addClosingBrackets = !dictElementFound && type.name !== PythonType.Dict;
                 }
-                if (result[0].label !== label) {
+                if (result[0] !== label) {
                     if (addClosingBrackets) {
                         for (let i = 0; i < collectionCount; i++) {
                             label += "]";
                         }
                     }
-                    result.push({ label });
+                    result.push(label);
                 }
                 return result;
             }
         }
         return null;
     }
-    
-    private createHint(typeName: string): TypeHint {
-        return { label: labelFor(this.typingString(typeName)) };
-    }
 
-    private typingString(typeName: string): string {
+    private toTypingString(typeName: string): string {
         const typingName = capitalized(typeName);
         return this.fromTypingImport && this.typingImports.includes(typingName) 
             ? `${typingName}[`

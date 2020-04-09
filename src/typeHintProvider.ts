@@ -3,7 +3,6 @@ import { PythonType as PythonType, DataTypeContainer, getDataTypeContainer } fro
 import { TypeSearch, VariableSearchResult } from "./typeSearch";
 import { TypingHintProvider } from "./typingHintProvider";
 import { WorkspaceSearcher } from "./workspaceSearcher";
-import { TypeHint, labelFor } from "./typeHint";
 import { TypeHintSettings } from "./settings";
 
 /**
@@ -21,7 +20,7 @@ export class TypeHintProvider {
         PythonType.Float
     ];
     private typeContainer: DataTypeContainer = getDataTypeContainer();
-    private typesIncludedInResult: { [key: string]: string } = {};
+    private typeNamesIncludedInResult: string[] = [];
     private doc: TextDocument;
     private settings: TypeHintSettings;
 
@@ -41,8 +40,8 @@ export class TypeHintProvider {
      * @param param The parameter name.
      * @returns An array of type hints, ordered by estimation accuracy.
      */
-    public async getTypeHints(param: string): Promise<TypeHint[]> {
-        const typeHints: TypeHint[] = [];
+    public async getTypeHints(param: string): Promise<string[]> {
+        const typeHints: string[] = [];
         const documentText = this.doc.getText();
 
         const typingHintProvider = new TypingHintProvider(documentText, this.typeContainer);
@@ -114,7 +113,7 @@ export class TypeHintProvider {
         return null;
     }
 
-    private typeGuessFor(param: string, typeHints: TypeHint[]): string | null {
+    private typeGuessFor(param: string, typeHints: string[]): string | null {
         const typeGuesses: { [key: string]: string } = {
             "string": PythonType.String,
             "text": PythonType.String,
@@ -132,18 +131,37 @@ export class TypeHintProvider {
         }
         return null;
     }
+
+
+    private add(typeName: string, typeHints: string[]) {
+        typeName = typeName.trim();
+        if (this.typeNotIncluded(typeName)) {
+            typeHints.push(typeName);
+            this.typeNamesIncludedInResult.push(typeName);
+        }
+    }
+            
+    private typeNotIncluded(type: string): boolean {
+        return !this.typeNamesIncludedInResult.includes(type);
+    }
+
+    private tryAdd(type: string | null, typeHints: string[]) {
+        if (type) {
+            this.add(type, typeHints);
+        }
+    }
     
     private tryAddTypingHints(
         typingFound: boolean,
         searchResult: VariableSearchResult | null,
         typingHintProvider: TypingHintProvider,
-        typeHints: TypeHint[]
+        typeHints: string[]
     ) {
         if (typingFound) {
-            const hints: TypeHint[] | null = typingHintProvider.getTypingHints(searchResult);
+            const hints: string[] | null = typingHintProvider.getTypingHints(searchResult);
             if (hints) {
                 for (const hint of hints) {
-                    this.addTypeHint(hint, typeHints);
+                    this.add(hint, typeHints);
                 }
             }
         }
@@ -153,37 +171,13 @@ export class TypeHintProvider {
         typingFound: boolean,
         typeName: string,
         typingHintProvider: TypingHintProvider,
-        typeHints: TypeHint[]
+        typeHints: string[]
     ) {
         if (typingFound) {
             const typingHint = typingHintProvider.getTypingHint(typeName);
             if (typingHint) {
-                this.addTypeHint(typingHint, typeHints);
+                this.add(typingHint, typeHints);
             }
-        }
-    }
-
-    private typeNotIncluded(type: string): boolean {
-        return !(type in this.typesIncludedInResult);
-    }
-
-    private add(type: string, typeHints: TypeHint[]) {
-        if (this.typeNotIncluded(type)) {
-            typeHints.push({ label: labelFor(type) });
-            this.typesIncludedInResult[type] = type;
-        }
-    }
-    
-    private addTypeHint(hint: TypeHint, typeHints: TypeHint[]) {
-        if (this.typeNotIncluded(hint.label)) {
-            typeHints.push(hint);
-            this.typesIncludedInResult[hint.label] = hint.label;
-        }
-    }
-
-    private tryAdd(type: string | null, typeHints: TypeHint[]) {
-        if (type) {
-            this.add(type, typeHints);
         }
     }
 }
