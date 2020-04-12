@@ -3,7 +3,7 @@
 Provides type hint auto-completion for Python, with completion items for built-in types, classes and the typing module.
 
 
-![](images/demo.gif)
+![](static/demo.gif)
 
 ## Features
 

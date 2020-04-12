@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "publisher": "njqdev",
     "description": "Type hint completion for Python.",
-    "icon": "images/icon.png",
+    "icon": "static/icon.png",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/njqdev/vscode-python-typehint"
