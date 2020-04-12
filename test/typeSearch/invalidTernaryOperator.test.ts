@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { TypeSearch, EstimationSource } from "../../../typeSearch";
+import { TypeSearch, EstimationSource } from "../../src/typeSearch";
 
 suite('CodeSearch.invalidTernaryOperator', function() {
 

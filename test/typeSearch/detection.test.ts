@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { getErrorMessage, TestCase } from "../common";
-import { TypeSearch } from "../../../typeSearch";
+import { TypeSearch } from "../../src/typeSearch";
 
 suite('CodeSearch.detectType', function() {
 

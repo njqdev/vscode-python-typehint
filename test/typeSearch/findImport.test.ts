@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { TypeSearch, EstimationSource } from "../../../typeSearch";
+import { TypeSearch } from "../../src/typeSearch";
 import { getErrorMessage } from '../common';
 
 suite('CodeSearch.findImport', function() {
