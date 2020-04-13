@@ -133,11 +133,12 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
     }
 
     /**
-     * The text is invalid if it is a comment, dict or the end of the function definition.
+     * The text is invalid if it is a comment, dict,
+     *  the end of the function definition or preceding a ':' within a string.
      */
     private isInvalid(precedingText: string): boolean {
         if (precedingText) {
-            return new RegExp("#|\\)$|{ *[a-zA-Z0-9.+*/\\(\\)-]+$").test(precedingText);
+            return new RegExp(`#|\\)$|['"][^'",]*$|{ *[a-zA-Z0-9.+*/\\(\\)-]+$`).test(precedingText);
         }
         return true;
     }

@@ -1,10 +1,10 @@
 {
 	"name": "vscode-python-typehint",
     "displayName": "Python Type Hint",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "publisher": "njqdev",
     "description": "Type hint completion for Python.",
-    "icon": "static/icon.png",
+    "icon": "images/icon.png",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/njqdev/vscode-python-typehint"
