@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import { getErrorMessage, TestCase } from "../common";
 import { TypeSearch } from "../../src/typeSearch";
 
-suite('CodeSearch.hintOfSimilarParam', function() {
+suite('CodeSearch.hintOfSimilarParam', () => {
 
     test("finds lone param", () => {
         const expected = "str";

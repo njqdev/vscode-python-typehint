@@ -15,7 +15,7 @@ import { paramHintTrigger, returnHintTrigger, PythonType, anyClassOrFunctionName
 import { TypeHintSettings } from "./settings";
 
 
-abstract class CompletionProvider {
+export abstract class CompletionProvider {
 
     protected pushTypesToItems(typeNames: PythonType[], completionItems: CompletionItem[]) {
         for (const typeName of typeNames) {
@@ -30,6 +30,13 @@ abstract class CompletionProvider {
     protected labelFor(typeName: string): string {
         return " " + typeName;
     }
+
+    abstract async provideCompletionItems(
+        doc: TextDocument, 
+        pos: Position,
+        token: CancellationToken,
+        context: CompletionContext
+    ): Promise<CompletionList | null>;
 }
 
 /**
@@ -113,7 +120,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
             let provide = new RegExp("^[ \t]*def", "m").test(precedingText);
 
             if (!provide) {
-                const nLinesToCheck = activePos.character > 4 ? 4 : activePos.line;
+                const nLinesToCheck = activePos.line > 4 ? 4 : activePos.line;
                 const range = new Range(doc.lineAt(activePos.line - nLinesToCheck).range.start, activePos);
                 provide = new RegExp(
                     `^[ \t]*def(?![\s\S]+(\\):|-> *${anyClassOrFunctionName}:))`,
