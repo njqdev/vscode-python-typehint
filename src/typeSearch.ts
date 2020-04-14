@@ -11,7 +11,7 @@ export enum EstimationSource {
 }
 
 /**
- * The result of a type search.
+ * The result of a variable type search.
  */
 export class VariableSearchResult {
     public typeName: string;
@@ -32,10 +32,10 @@ export class TypeSearch {
      * Searches for a class with the same name as object and returns the name if found.
      * 
      * @param object The object.
-     * @param documentText The text to search
+     * @param src The source code to search.
      */
-    public static classWithSameName(object: string, documentText: string): string | null {
-        const clsMatch = new RegExp(`^ *class +(${object})[(:]`, "mi").exec(documentText);
+    public static classWithSameName(object: string, src: string): string | null {
+        const clsMatch = new RegExp(`^ *class +(${object})[(:]`, "mi").exec(src);
         return clsMatch ? clsMatch[1] : null;
     }
 
@@ -43,11 +43,11 @@ export class TypeSearch {
      * Searches for a variable with the same name as the param and detects its type.
      * 
      * @param param The parameter name.
-     * @param documentText The source code of the document.
+     * @param src The source code to search.
      * @returns A search result or null.
      */
-    public static async variableWithSameName(param: string, documentText: string): Promise<VariableSearchResult | null> {
-        let match = this.variableSearchRegExp(param).exec(documentText);
+    public static async variableWithSameName(param: string, src: string): Promise<VariableSearchResult | null> {
+        let match = this.variableSearchRegExp(param).exec(src);
         if (!match) {
             return null;
         }
@@ -65,12 +65,12 @@ export class TypeSearch {
 
         if (match[0].endsWith("(")) {
             let value = match[1];
-            if (this.classWithSameName(value, documentText)) {
+            if (this.classWithSameName(value, src)) {
                 return new VariableSearchResult(value, EstimationSource.ClassDefinition, valueAssignment);
             }
 
             if (this.isProbablyAClass(value)) {
-                if (!new RegExp(`^[ \t]*def ${value}\\(` ).test(documentText)) {
+                if (!new RegExp(`^[ \t]*def ${value}\\(` ).test(src)) {
                     return new VariableSearchResult(value, EstimationSource.Value, valueAssignment);
                 }
             } else {
@@ -81,7 +81,7 @@ export class TypeSearch {
                 // Find the function definition and check if the return type is hinted
                 const regExp = new RegExp(`^[ \t]*def ${value}\\([^)]*\\) *-> *([a-zA-Z_][a-zA-Z0-9_.\\[\\]]+)`, "m");
 
-                const hintedCallMatch = regExp.exec(documentText);
+                const hintedCallMatch = regExp.exec(src);
 
                 if (hintedCallMatch && hintedCallMatch.length === 2) {
                     return new VariableSearchResult(
@@ -95,9 +95,9 @@ export class TypeSearch {
         }
 
         // Searching the import source document is not supported (yet?)
-        if (!this.isImported(match[1], documentText.substr(match.index - match.length))) {
+        if (!this.isImported(match[1], src.substr(match.index - match.length))) {
             
-            if (match = this.variableSearchRegExp(match[1]).exec(documentText)) {
+            if (match = this.variableSearchRegExp(match[1]).exec(src)) {
                 const otherType = this.detectType(match[1]);
                 return otherType 
                     ? new VariableSearchResult(otherType, EstimationSource.ValueOfOtherVariable, valueAssignment)
@@ -108,9 +108,9 @@ export class TypeSearch {
     }
 
     /**
-     * Detects the type of a value, if it is a built in Python type.
+     * Detects the type of a value.
      * 
-     * @returns The type name or null if not found.
+     * @returns The type name, or null if it is not a built-in Python type.
      */
     public static detectType(value: string): string | null {
         const searches = [
@@ -148,13 +148,11 @@ export class TypeSearch {
      * Searches for a previously hinted param with the same name.
      * 
      * @param param The parameter name.
-     * @param documentText The document text to search.
+     * @param src The document text to search.
      * @returns The type hint of the found parameter or null.
      */
-    public static hintOfSimilarParam(param: string, documentText: string): string | null {
-        const m = new RegExp(
-            `^[ \t]*def ${anyClassOrFunctionName}\\([^)]*\\b${param}\\b: *([^), ]+)`, "m"
-        ).exec(documentText);
+    public static hintOfSimilarParam(param: string, src: string): string | null {
+        const m = new RegExp(`^[ \t]*def ${anyClassOrFunctionName}\\([^)]*\\b${param}\\b: *([^), ]+)`, "m").exec(src);
         if (m) {
             let hint = m[1].trim();
             return hint ? hint : null;
@@ -166,6 +164,7 @@ export class TypeSearch {
      * Searches the result for a terinary operator that might return 2 or more different types.
      * 
      * @param searchResult The search result.
+     * @returns False if it returns a single type.
      */
     public static invalidTernaryOperator(searchResult: VariableSearchResult): boolean {
 
@@ -192,14 +191,17 @@ export class TypeSearch {
     }
 
     /**
-     * Detects if an object is imported.
+     * Detects if a value is imported in a document.
      * 
+     * @param value The value.
+     * @param src The document text to search.
+     * @param considerAsImports Also search for 'import x as value' imports. 
      * @returns The imported value.
      */
-    public static findImport(object: string, documentText: string, checkForAsImports: boolean = true): string | null {
+    public static findImport(value: string, src: string, considerAsImports: boolean = true): string | null {
 
-        if (object.includes(".")) {
-            const s = object.split(".");
+        if (value.includes(".")) {
+            const s = value.split(".");
             const type = s[s.length - 1];
             const module = s.slice(0, s.length - 1).join(".");
 
@@ -208,30 +210,29 @@ export class TypeSearch {
             if (s.length === 2 && module !== type) {
                 match = new RegExp(
                     `^[ \t]*import +${module}|^[ \t]*from ${anyClassOrFunctionName} import (${module})`, "m"
-                ).exec(documentText);
+                ).exec(src);
                 if (match) {    
                     // Return 'Object.Type' for 'from x import Object'
-                    return match[1] ? `${match[1]}.${type}` : object;
+                    return match[1] ? `${match[1]}.${type}` : value;
                 }
             }
-            match = new RegExp(`^[ \t]*import +${module}|^[ \t]*from ${module} import (${type})`, "m")
-                .exec(documentText);
-            return match ? match[1] ? match[1] : object : null;
+            match = new RegExp(`^[ \t]*import +${module}|^[ \t]*from ${module} import (${type})`, "m").exec(src);
+            return match ? match[1] ? match[1] : value : null;
         }
-        return this.isImported(object, documentText, checkForAsImports) ? object : null;
+        return this.isImported(value, src, considerAsImports) ? value : null;
     }
 
     /**
-     * Detects if an object is imported.
+     * Detects if a value is imported.
      */
-    private static isImported(object: string, documentText: string, checkForAsImports: boolean = true): boolean {
+    private static isImported(value: string, src: string, checkForAsImports: boolean = true): boolean {
 
-        let exp = `^[ \t]*(from +${anyClassOrFunctionName} +import +${object}`;
+        let exp = `^[ \t]*(from +${anyClassOrFunctionName} +import +${value}`;
         if (checkForAsImports) {
-            exp += `|from +${anyClassOrFunctionName} +import +${anyClassOrFunctionName} +as +${object}`;
+            exp += `|from +${anyClassOrFunctionName} +import +${anyClassOrFunctionName} +as +${value}`;
         }
         exp += ")";
-        return new RegExp(exp,"m").test(documentText);
+        return new RegExp(exp,"m").test(src);
     }
 
     private static isProbablyAClass(lineText: string): boolean {
