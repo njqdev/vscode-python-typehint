@@ -44,7 +44,7 @@ export class TypingHintProvider {
             return true;
         } else {
             m = new RegExp(
-                `^[ \t]*(import +typing +as +([a-zA-Z_][a-zA-Z0-9_-]+)|import +typing)`,
+                `^[ \t]*(import +typing +as +([a-zA-Z_][a-zA-Z0-9_-]*)|import +typing)`,
                 "m"
             ).exec(this.docText);
             if (m) {
