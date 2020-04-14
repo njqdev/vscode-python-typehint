@@ -11,7 +11,6 @@ export class TypingHintProvider {
     private typeContainer: DataTypeContainer;
     private fromTypingImport: boolean = false;
     private typingPrefix: string = "typing";
-    private typingImports: string[] = [];
 
     /**
      * Constructs a new TypingHintProvider.
@@ -37,10 +36,6 @@ export class TypingHintProvider {
         
         if (m) {
             this.fromTypingImport = true;
-            const typings = m[1].split(",");
-            typings.forEach(t => {
-                this.typingImports.push(t.trim());
-            });
             return true;
         } else {
             m = new RegExp(
@@ -49,7 +44,7 @@ export class TypingHintProvider {
             ).exec(this.docText);
             if (m) {
                 if (m[2]) {
-                    this.typingPrefix = m[3];
+                    this.typingPrefix = m[2];
                 }
                 return true;
             }
@@ -127,8 +122,6 @@ export class TypingHintProvider {
 
     private toTypingString(typeName: string): string {
         const typingName = capitalized(typeName);
-        return this.fromTypingImport && this.typingImports.includes(typingName) 
-            ? `${typingName}[`
-            : `${this.typingPrefix}.${typingName}[`;
+        return this.fromTypingImport ? `${typingName}[` : `${this.typingPrefix}.${typingName}[`;
     }
 }
