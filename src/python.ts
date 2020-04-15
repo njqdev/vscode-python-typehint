@@ -1,5 +1,5 @@
 
-export const anyClassOrFunctionName: string = "[a-zA-Z_][a-zA-Z0-9_.]*";
+export const simpleIdentifier: string = "[a-zA-Z_][a-zA-Z0-9_.]*";
 
 export const paramHintTrigger: string = ":";
 export const returnHintTrigger: string = ">";

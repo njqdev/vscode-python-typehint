@@ -1,15 +1,15 @@
 import * as assert from 'assert';
 import { TypeSearch, EstimationSource } from "../../src/typeSearch";
+import { varSearchResult } from '../common';
 
-suite('CodeSearch.invalidTernaryOperator', function() {
+suite('TypeSearch.invalidTernaryOperator', () => {
 
     test("returns true for invalid operator", () => {
         
         let expected = true;
         let typeName = "int";
         let src = "var = 1 if ok else 2.213";
-        let searchResult = { typeName, estimationSource: EstimationSource.Value, valueAssignment: src };
-        let actual = TypeSearch.invalidTernaryOperator(searchResult);
+        let actual = TypeSearch.invalidTernaryOperator(varSearchResult(typeName, src));
         assert.equal(actual, expected);
     });
 
@@ -17,8 +17,7 @@ suite('CodeSearch.invalidTernaryOperator', function() {
         let expected = true;
         let typeName = "int";
         let src = "var = 1 if ok else 2 if True else 'false'";
-        let searchResult = { typeName, estimationSource: EstimationSource.Value, valueAssignment: src };
-        let actual = TypeSearch.invalidTernaryOperator(searchResult);
+        let actual = TypeSearch.invalidTernaryOperator(varSearchResult(typeName, src));
         assert.equal(actual, expected);
     });
 
@@ -27,8 +26,7 @@ suite('CodeSearch.invalidTernaryOperator', function() {
         let expected = false;
         let typeName = "int";
         let src = "var = 1 if ok else 2";
-        let searchResult = { typeName, estimationSource: EstimationSource.Value, valueAssignment: src };
-        let actual = TypeSearch.invalidTernaryOperator(searchResult);
+        let actual = TypeSearch.invalidTernaryOperator(varSearchResult(typeName, src));
         assert.equal(actual, expected);
     });
 
@@ -36,8 +34,7 @@ suite('CodeSearch.invalidTernaryOperator', function() {
         let expected = false;
         let typeName = "int";
         let src = "var = 1 if ok else 2 if True else 9";
-        let searchResult = { typeName, estimationSource: EstimationSource.Value, valueAssignment: src };
-        let actual = TypeSearch.invalidTernaryOperator(searchResult);
+        let actual = TypeSearch.invalidTernaryOperator(varSearchResult(typeName, src));
         assert.equal(actual, expected);
     });
 

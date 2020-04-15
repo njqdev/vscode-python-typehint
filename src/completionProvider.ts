@@ -95,7 +95,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
             last = precedingText[i];
         }
         param = param.trim();
-        return !param || /[),!:?/\\{}.+/=()'"&%¤|<>$^~¨ -]/.test(param) ? null : param;
+        return !param || /[!:?/\\{}.+/=)'";@&£%¤|<>$^~¨ -]/.test(param) ? null : param;
     }
     
     private pushEstimationsToItems(typeHints: string[], items: CompletionItem[]) {
