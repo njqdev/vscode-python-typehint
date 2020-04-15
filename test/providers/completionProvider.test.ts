@@ -11,28 +11,35 @@ suite('ParamHintCompletionProvider', () => {
     test("provides items for first param", async () => {
         let param = "paramName:";
         let actual = await providerResult(provider, param, "):\n\nparamName = 12");
+
+        // Multiple asserts, so if the test fails it is more obvious why.
+        assert.notEqual(actual, null);
         assert.equal(actual?.items[0].label.trim(), PythonType.Int);
     });
 
     test("provides items for non-first param", async () => {
         let param = "first: str, paramName:";
         let actual = await providerResult(provider, param, "\n\nparamName = 12");
+        assert.notEqual(actual, null);
         assert.equal(actual?.items[0].label.trim(), PythonType.Int);
     });
 
     test("provides items for param on new line", async () => {
         let param = "\n    paramName:";
         let actual = await providerResult(provider, param, "\n\nparamName = 12");
+        assert.notEqual(actual, null);
         assert.equal(actual?.items[0].label.trim(), PythonType.Int);
 
         param = "\n\tparamName:";
         actual = await providerResult(provider, param, "\n\nparamName = 12");
+        assert.notEqual(actual, null);
         assert.equal(actual?.items[0].label.trim(), PythonType.Int);
     });
     
     test("provides items for param with legal non-ascii chars", async () => {
         let param = "a変な:";
         let actual = await providerResult(provider, param, "\n\na変な = 12");
+        assert.notEqual(actual, null);
         assert.equal(actual?.items[0].label.trim(), PythonType.Int);
     });
 
@@ -63,6 +70,12 @@ suite('ParamHintCompletionProvider', () => {
         let expected = null;
         let actual = await providerResult(provider, "):");
         assert.equal(actual, expected);
+    });
+
+    test("does not include * in parameter name", async () => {
+        let param = "*paramName:";
+        let actual = await providerResult(provider, param, "\n\nparamName = 12");
+        assert.equal(actual?.items[0].label.trim(), PythonType.Int);
     });
 
 });
