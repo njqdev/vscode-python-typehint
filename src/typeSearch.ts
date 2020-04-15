@@ -1,4 +1,4 @@
-import { anyClassOrFunctionName, PythonType } from "./python";
+import { simpleIdentifier, PythonType } from "./python";
 
 /**
  * The source of a type estimation.
@@ -58,7 +58,7 @@ export class TypeSearch {
             return new VariableSearchResult(typeName, EstimationSource.Value, valueAssignment);
         }
         
-        match = new RegExp(`^ *(${anyClassOrFunctionName})\\(?`).exec(valueAssignment);
+        match = new RegExp(`^ *(${simpleIdentifier})\\(?`).exec(valueAssignment);
         if (!match) {
             return null;
         }
@@ -152,7 +152,7 @@ export class TypeSearch {
      * @returns The type hint of the found parameter or null.
      */
     public static hintOfSimilarParam(param: string, src: string): string | null {
-        const m = new RegExp(`^[ \t]*def ${anyClassOrFunctionName}\\([^)]*\\b${param}\\b: *([^), ]+)`, "m").exec(src);
+        const m = new RegExp(`^[ \t]*def ${simpleIdentifier}\\([^)]*\\b${param}\\b: *([^),\\s]+)`, "m").exec(src);
         if (m) {
             let hint = m[1].trim();
             return hint ? hint : null;
@@ -209,7 +209,7 @@ export class TypeSearch {
 
             if (s.length === 2 && module !== type) {
                 match = new RegExp(
-                    `^[ \t]*import +${module}|^[ \t]*from ${anyClassOrFunctionName} import (${module})`, "m"
+                    `^[ \t]*import +${module}|^[ \t]*from ${simpleIdentifier} import (${module})`, "m"
                 ).exec(src);
                 if (match) {    
                     // Return 'Object.Type' for 'from x import Object'
@@ -227,9 +227,9 @@ export class TypeSearch {
      */
     private static isImported(value: string, src: string, checkForAsImports: boolean = true): boolean {
 
-        let exp = `^[ \t]*(from +${anyClassOrFunctionName} +import +${value}`;
+        let exp = `^[ \t]*(from +${simpleIdentifier} +import +${value}`;
         if (checkForAsImports) {
-            exp += `|from +${anyClassOrFunctionName} +import +${anyClassOrFunctionName} +as +${value}`;
+            exp += `|from +${simpleIdentifier} +import +${simpleIdentifier} +as +${value}`;
         }
         exp += ")";
         return new RegExp(exp,"m").test(src);
