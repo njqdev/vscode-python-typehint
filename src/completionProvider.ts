@@ -11,7 +11,7 @@ import {
     Range
 } from "vscode";
 import { TypeHintProvider } from "./typeHintProvider";
-import { paramHintTrigger, returnHintTrigger, PythonType, anyClassOrFunctionName } from "./python";
+import { paramHintTrigger, returnHintTrigger, PythonType, simpleIdentifier  } from "./python";
 import { TypeHintSettings } from "./settings";
 
 
@@ -63,39 +63,39 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
             const precedingText = line.text.substring(0, pos.character - 1).trim();
 
             if (this.shouldProvideItems(precedingText, pos, doc)) {
-                const param: string = this.findParam(precedingText);
+                const param = this.getParam(precedingText);
                 const provider = new TypeHintProvider(doc, this.settings);
         
-                if (param.length > 0) {
+                if (param) {
                     try {
                         this.pushEstimationsToItems(await provider.getTypeHints(param), items); 
                     } catch (error) {
-                    }     
+                    }   
+                    this.pushTypesToItems(provider.getRemainingTypes(), items);
+                    return Promise.resolve(new CompletionList(items, false));  
                 }
-                this.pushTypesToItems(provider.getRemainingTypes(), items);
-                return Promise.resolve(new CompletionList(items, false));
             }
         }
         return Promise.resolve(null);
     }
 
     /**
-     * Finds the parameter which is about to be type hinted.
+     * Returns the parameter which is about to be type hinted.
      * 
      * @param precedingText The text before the active position.
-     * @returns The parameter.
      */
-    private findParam(precedingText: string): string {
+    private getParam(precedingText: string): string | null {
         let param = "";
 
         let i = precedingText.length - 1;
         let last = precedingText[i];
-        while (last !== "," && last !== "(" && i >= 0) {
+        while (last !== "," && last !== "(" && last !== "*" && i >= 0) {
             param = precedingText[i] + param;
             i--;
             last = precedingText[i];
         }
-        return param.trim();
+        param = param.trim();
+        return !param || /[),!:?/\\{}.+/=()'"&%¤|<>$^~¨ -]/.test(param) ? null : param;
     }
     
     private pushEstimationsToItems(typeHints: string[], items: CompletionItem[]) {
@@ -116,31 +116,20 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
 
     private shouldProvideItems(precedingText: string, activePos: Position, doc: TextDocument): boolean {
 
-        if (activePos.character > 0 && !this.isInvalid(precedingText)) {
-            let provide = new RegExp("^[ \t]*def", "m").test(precedingText);
+        if (activePos.character > 0 && !/#/.test(precedingText)) {
+            let provide = new RegExp("^[ \t]*def\\(", "m").test(precedingText);
 
             if (!provide) {
                 const nLinesToCheck = activePos.line > 4 ? 4 : activePos.line;
                 const range = new Range(doc.lineAt(activePos.line - nLinesToCheck).range.start, activePos);
                 provide = new RegExp(
-                    `^[ \t]*def(?![\s\S]+(\\):|-> *${anyClassOrFunctionName}:))`,
+                    `^[ \t]*def(?![\s\S]+(\\):|-> *${simpleIdentifier}:))`,
                     "m"
                 ).test(doc.getText(range));
             }
             return provide;
         }
         return false;
-    }
-
-    /**
-     * The text is invalid if it is a comment, dict,
-     *  the end of the function definition or preceding a ':' within a string.
-     */
-    private isInvalid(precedingText: string): boolean {
-        if (precedingText) {
-            return new RegExp(`#|\\)$|['"][^'",]*$|{ *[a-zA-Z0-9.+*/\\(\\)-]+$`).test(precedingText);
-        }
-        return true;
     }
 }
 
