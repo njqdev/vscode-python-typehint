@@ -117,15 +117,14 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
     private shouldProvideItems(precedingText: string, activePos: Position, doc: TextDocument): boolean {
 
         if (activePos.character > 0 && !/#/.test(precedingText)) {
-            let provide = new RegExp("^[ \t]*def\\(", "m").test(precedingText);
+            let provide = new RegExp("^[ \t]*def [^(]+\\(", "m").test(precedingText);
 
             if (!provide) {
                 const nLinesToCheck = activePos.line > 4 ? 4 : activePos.line;
-                const range = new Range(doc.lineAt(activePos.line - nLinesToCheck).range.start, activePos);
-                provide = new RegExp(
-                    `^[ \t]*def(?![\s\S]+(\\):|-> *${simpleIdentifier}:))`,
-                    "m"
-                ).test(doc.getText(range));
+                const previousLines = doc.getText(
+                    new Range(doc.lineAt(activePos.line - nLinesToCheck).range.start, activePos)
+                );
+                provide = new RegExp(`^[ \t]*def(?![\\s\\S]+(\\):|-> *${simpleIdentifier}:))`, "m").test(previousLines);
             }
             return provide;
         }

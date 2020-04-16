@@ -42,6 +42,15 @@ suite('ParamHintCompletionProvider', () => {
         assert.notEqual(actual, null);
         assert.equal(actual?.items[0].label.trim(), PythonType.Int);
     });
+
+    test("provides items for nestled function", async () => {
+        let data = `):
+    x = 1
+    def nestled(multiple_lines,
+                paramName:`;
+        let actual = await providerResult(provider, data);
+        assert.notEqual(actual, null);
+    });
     
     test("does not provide items unless a function def is detected", async () => {
         let text = " :";
@@ -56,16 +65,33 @@ suite('ParamHintCompletionProvider', () => {
     });
 
     test("does not provide items for ':' under a function def", async () => {
-        let data = "):\n    d = 'val:";
+        let data = "):\n    d = ', not_a_param:";
         let expected = null;
         let actual = await providerResult(provider, data);
         assert.equal(actual, expected, messageFor({ data, expected }, actual));
+
+        data = `self, lt: List[Tuple[str]],
+                s: str,
+                f: float,
+                i: int):
+    v = ', not_a_param:`;
+        actual = await providerResult(provider, data);
+        assert.equal(actual, null, messageFor({ data, expected }, actual));
         
         data = "):\n    :";
         actual = await providerResult(provider, data);
         assert.equal(actual, expected, messageFor({ data, expected }, actual));
 
         data = "):\n d = { key:";
+        actual = await providerResult(provider, data);
+        assert.equal(actual, null, messageFor({ data, expected }, actual));
+
+        data = `
+        def __init__(self, lt: List[Tuple[str]],
+            s: str,
+            f: float,
+            i: int):
+            v = ', not_a_param:`;
         actual = await providerResult(provider, data);
         assert.equal(actual, null, messageFor({ data, expected }, actual));
     });
@@ -99,7 +125,11 @@ async function providerResult(
         content += trailingText;
     }
 
-    return provideCompletionItems(provider, content, lastPos);
+    const doc = await vsc.workspace.openTextDocument({ language, content });
+    const token = new vsc.CancellationTokenSource().token;
+    const ctx = { triggerCharacter: paramHintTrigger, triggerKind: vsc.CompletionTriggerKind.TriggerCharacter };
+
+    return provider.provideCompletionItems(doc, lastPos, token, ctx);
 }
 
 async function provideCompletionItems(
