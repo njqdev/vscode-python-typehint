@@ -42,17 +42,17 @@ suite('ParamHintCompletionProvider', () => {
         assert.notEqual(actual, null);
         assert.equal(actual?.items[0].label.trim(), PythonType.Int);
     });
-
-    test("does not provide items for dict keys", async () => {
-        let expected = null;
-        let actual = await providerResult(provider, "):\n d = { key:");
-        assert.equal(actual, expected);
+    
+    test("does not provide items unless a function def is detected", async () => {
+        let text = " :";
+        let pos = new vsc.Position(0, text.length);
+        let actual = await provideCompletionItems(provider, text, pos);
+        assert.equal(actual, null);
     });
 
     test("does not provide items for ':' without a param (within function brackets)", async () => {
-        let expected = null;
         let actual = await providerResult(provider, "param, :");
-        assert.equal(actual, expected);
+        assert.equal(actual, null);
     });
 
     test("does not provide items for ':' under a function def", async () => {
@@ -64,12 +64,15 @@ suite('ParamHintCompletionProvider', () => {
         data = "):\n    :";
         actual = await providerResult(provider, data);
         assert.equal(actual, expected, messageFor({ data, expected }, actual));
+
+        data = "):\n d = { key:";
+        actual = await providerResult(provider, data);
+        assert.equal(actual, null, messageFor({ data, expected }, actual));
     });
 
     test("does not provide items for end of function definition", async () => {
-        let expected = null;
         let actual = await providerResult(provider, "):");
-        assert.equal(actual, expected);
+        assert.equal(actual, null);
     });
 
     test("does not include * in parameter name", async () => {
@@ -96,9 +99,17 @@ async function providerResult(
         content += trailingText;
     }
 
-    const doc = await vsc.workspace.openTextDocument({ language, content });
+    return provideCompletionItems(provider, content, lastPos);
+}
+
+async function provideCompletionItems(
+    provider: CompletionProvider, 
+    documentContent: string,
+    pos: vsc.Position
+): Promise<vsc.CompletionList | null> {
+    const doc = await vsc.workspace.openTextDocument({ language, content: documentContent });
     const token = new vsc.CancellationTokenSource().token;
     const ctx = { triggerCharacter: paramHintTrigger, triggerKind: vsc.CompletionTriggerKind.TriggerCharacter };
 
-    return provider.provideCompletionItems(doc, lastPos, token, ctx);
+    return provider.provideCompletionItems(doc, pos, token, ctx);
 }
