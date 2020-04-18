@@ -1,4 +1,4 @@
-import { TypeCategory, PythonType, DataTypeContainer } from "./python";
+import { TypeCategory, PythonType, DataTypeContainer, DataType } from "./python";
 import { capitalized } from "./utils";
 import { VariableSearchResult, TypeSearch } from "./typeSearch";
 
@@ -7,32 +7,31 @@ import { VariableSearchResult, TypeSearch } from "./typeSearch";
  */
 export class TypingHintProvider {
 
-    private docText: string;
     private typeContainer: DataTypeContainer;
     private fromTypingImport: boolean = false;
+    private providedTypes: DataType[] = [];
     private typingPrefix: string = "typing";
 
     /**
      * Constructs a new TypingHintProvider.
      * 
-     * @param docText The document text to search.
      * @param typeContainer A container with built-in Python types.
      */
-    constructor(docText: string, typeContainer: DataTypeContainer) {
-        this.docText = docText;
+    constructor(typeContainer: DataTypeContainer) {
         this.typeContainer = typeContainer;
     }
 
     /**
-     * Determines if this object's document contains a typing import.
+     * Determines if a document contains a typing import.
      * 
+     * @param docText The document text to search.
      * @returns True if typing is imported.
      */
-    public async containsTyping(): Promise<boolean> {
+    public async detectTypingImport(docText: string): Promise<boolean> {
         let m = new RegExp(
             `^[ \t]*from typing import +([A-Z][a-zA-Z0-9 ,]+)`,
             "m"
-        ).exec(this.docText);
+        ).exec(docText);
         
         if (m) {
             this.fromTypingImport = true;
@@ -41,7 +40,7 @@ export class TypingHintProvider {
             m = new RegExp(
                 `^[ \t]*(import +typing +as +([a-zA-Z_][a-zA-Z0-9_-]*)|import +typing)`,
                 "m"
-            ).exec(this.docText);
+            ).exec(docText);
             if (m) {
                 if (m[2]) {
                     this.typingPrefix = m[2];
@@ -58,9 +57,10 @@ export class TypingHintProvider {
      * @param type A type name.
      * @returns A type hint without a closing bracket, for example 'List[ '.
      */
-    public getTypingHint(typeName: string): string | null {
+    public getHint(typeName: string): string | null {
         const type = this.typeContainer[typeName];
         if (type.category === TypeCategory.Collection) {
+            this.providedTypes.push(type);
             return this.toTypingString(type.name);
         }
         return null;
@@ -72,9 +72,12 @@ export class TypingHintProvider {
      * @param searchResult A search result to derive hints from.
      * @returns One or two type hints. For example, 'List[' and 'List[str]'.
      */
-    public getTypingHints(searchResult: VariableSearchResult | null): string[] | null {
+    public getHints(searchResult: VariableSearchResult | null): string[] | null {
+
         if (searchResult && searchResult.typeName in this.typeContainer) {
             const type = this.typeContainer[searchResult.typeName];
+            this.providedTypes.push(type);
+
             const result: string[] = [ this.toTypingString(type.name)];
             let label = result[0];
 
@@ -118,6 +121,22 @@ export class TypingHintProvider {
             }
         }
         return null;
+    }
+
+    /**
+     * Get hints for collection types that have not been provided yet.
+     * 
+     * @returns An array of types.
+     */
+    public getRemainingHints(): string[] {
+        const result: string[] = [];
+
+        for (const type of Object.values(this.typeContainer).filter(t => t.category === TypeCategory.Collection)) {
+            if (!this.providedTypes.includes(type)) {
+                result.push(this.toTypingString(type.name));
+            }
+        }
+        return result;
     }
 
     private toTypingString(typeName: string): string {

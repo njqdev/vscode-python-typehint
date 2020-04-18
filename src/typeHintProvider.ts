@@ -10,6 +10,9 @@ import { TypeHintSettings } from "./settings";
  */
 export class TypeHintProvider {
     
+    private doc: TextDocument;
+    private settings: TypeHintSettings;
+    private typingHintProvider: TypingHintProvider;
     private likelyTypes: PythonType[] = [
         PythonType.String,
         PythonType.List, 
@@ -19,10 +22,9 @@ export class TypeHintProvider {
         PythonType.Tuple, 
         PythonType.Float
     ];
+    private providedTypeHints: string[] = [];
     private typeContainer: DataTypeContainer = getDataTypeContainer();
-    private typeNamesIncludedInResult: string[] = [];
-    private doc: TextDocument;
-    private settings: TypeHintSettings;
+    private _typingImported = false;
 
     /**
      * Constructs a new TypeHintProvider.
@@ -33,20 +35,24 @@ export class TypeHintProvider {
     constructor(doc: TextDocument, settings: TypeHintSettings) {
         this.doc = doc;
         this.settings = settings;
+        this.typingHintProvider = new TypingHintProvider(this.typeContainer);
+    }
+
+    public get typingImported() {
+        return this._typingImported;
     }
 
     /**
-     * Provides type hints for a parameter.
+     * Estimates a parameter's type and returns type hints for it. 
+     * The returned hints are ordered with the most likely type being first. 
      * 
      * @param param The parameter name.
-     * @returns An array of type hints, ordered by estimation accuracy.
      */
     public async getTypeHints(param: string): Promise<string[]> {
         const typeHints: string[] = [];
         const documentText = this.doc.getText();
 
-        const typingHintProvider = new TypingHintProvider(documentText, this.typeContainer);
-        const typingSearch = typingHintProvider.containsTyping();
+        const typingSearch = this.typingHintProvider.detectTypingImport(documentText);
 
         const variableSearch = TypeSearch.variableWithSameName(param, documentText);
 
@@ -59,7 +65,7 @@ export class TypeHintProvider {
         let typeName = this.getTypeParamEndsWith(param, "_");
         if (typeName) {
             this.add(typeName, typeHints);
-            this.tryAddTypingHint(await typingSearch, typeName, typingHintProvider, typeHints);
+            this.tryAddTypingHint(await typingSearch, typeName, typeHints);
             wsSearcher.cancel();
             await workspaceSearch;
             return typeHints;
@@ -69,33 +75,42 @@ export class TypeHintProvider {
 
         if (searchResult !== null && !TypeSearch.invalidTernaryOperator(searchResult)) {
             this.add(searchResult.typeName, typeHints);
-            this.tryAddTypingHints(await typingSearch, searchResult, typingHintProvider, typeHints);
+            this.tryAddTypingHints(await typingSearch, searchResult, typeHints);
             this.tryAdd(this.typeGuessFor(param, typeHints), typeHints);
-        } else if (typeName = this.getTypeParamEndsWith(param, "")) {
-            this.add(typeName, typeHints);
-            this.tryAddTypingHint(await typingSearch, typeName, typingHintProvider, typeHints);
         } else {
-            this.tryAdd(this.typeGuessFor(param, typeHints), typeHints);
-        }
+            typeName = this.getTypeParamEndsWith(param, "");
+            if (typeName) {
+                this.add(typeName, typeHints);
+                this.tryAddTypingHint(await typingSearch, typeName, typeHints);
+            } else {
+                this.tryAdd(this.typeGuessFor(param, typeHints), typeHints);
+            }
+        } 
 
         this.tryAdd(await workspaceSearch, typeHints);
         return typeHints;
     }
     
     /**
-     * Gets types that have not been provided as hints.
-     * 
-     * @returns An array of types.
+     * Returns hints for types that have not been provided yet.
      */
-    public getRemainingTypes(): PythonType[] {
+    public remainingTypeHints(): PythonType[] {
         const result: PythonType[] = [];
 
         for (const type of Object.values(this.typeContainer)) {
-            if (this.typeNotIncluded(type.name)) {
+            if (this.hintNotProvided(type.name)) {
                 result.push(type.name);
             }
         }
+
         return result;
+    }
+
+    /**
+     * Returns hints for the typing module that have not been provided yet.
+     */
+    public remainingTypingHints(): string[] {
+        return this.typingHintProvider.getRemainingHints();
     }
 
     /**
@@ -134,16 +149,16 @@ export class TypeHintProvider {
     }
 
 
-    private add(typeName: string, typeHints: string[]) {
-        typeName = typeName.trim();
-        if (this.typeNotIncluded(typeName)) {
-            typeHints.push(typeName);
-            this.typeNamesIncludedInResult.push(typeName);
+    private add(type: string, typeHints: string[]) {
+        type = type.trim();
+        if (this.hintNotProvided(type)) {
+            typeHints.push(type);
+            this.providedTypeHints.push(type);
         }
     }
             
-    private typeNotIncluded(type: string): boolean {
-        return !this.typeNamesIncludedInResult.includes(type);
+    private hintNotProvided(type: string): boolean {
+        return !this.providedTypeHints.includes(type);
     }
 
     private tryAdd(type: string | null, typeHints: string[]) {
@@ -155,11 +170,10 @@ export class TypeHintProvider {
     private tryAddTypingHints(
         typingFound: boolean,
         searchResult: VariableSearchResult | null,
-        typingHintProvider: TypingHintProvider,
         typeHints: string[]
     ) {
         if (typingFound) {
-            const hints: string[] | null = typingHintProvider.getTypingHints(searchResult);
+            const hints: string[] | null = this.typingHintProvider.getHints(searchResult);
             if (hints) {
                 for (const hint of hints) {
                     this.add(hint, typeHints);
@@ -168,14 +182,10 @@ export class TypeHintProvider {
         }
     }
 
-    private tryAddTypingHint(
-        typingFound: boolean,
-        typeName: string,
-        typingHintProvider: TypingHintProvider,
-        typeHints: string[]
-    ) {
-        if (typingFound) {
-            const typingHint = typingHintProvider.getTypingHint(typeName);
+    private tryAddTypingHint(typingImported: boolean, typeName: string, typeHints: string[]) {
+        this._typingImported = typingImported;
+        if (typingImported) {
+            const typingHint = this.typingHintProvider.getHint(typeName);
             if (typingHint) {
                 this.add(typingHint, typeHints);
             }

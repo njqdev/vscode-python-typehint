@@ -17,18 +17,19 @@ import { TypeHintSettings } from "./settings";
 
 export abstract class CompletionProvider {
 
-    protected pushTypesToItems(typeNames: PythonType[], completionItems: CompletionItem[]) {
-        for (const typeName of typeNames) {
-            const item = new CompletionItem(this.labelFor(typeName), CompletionItemKind.TypeParameter);
-    
-            // Add 999 to ensure they're sorted to the bottom of the CompletionList.
-            item.sortText = `999${typeName}`;
+    protected bottomOfListSortPrefix: number = 999;
+
+    protected pushHintsToItems(typeHints: string[], completionItems: CompletionItem[]) {
+        const sortTextPrefix = this.bottomOfListSortPrefix.toString();
+        for (const hint of typeHints) {
+            const item = new CompletionItem(this.labelFor(hint), CompletionItemKind.TypeParameter);
+            item.sortText = sortTextPrefix + hint;
             completionItems.push(item);
         }
     }
 
-    protected labelFor(typeName: string): string {
-        return " " + typeName;
+    protected labelFor(typeHint: string): string {
+        return " " + typeHint;
     }
 
     abstract async provideCompletionItems(
@@ -69,9 +70,20 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
                 if (param) {
                     try {
                         this.pushEstimationsToItems(await provider.getTypeHints(param), items); 
-                    } catch (error) {
-                    }   
-                    this.pushTypesToItems(provider.getRemainingTypes(), items);
+                    } catch {
+                    }
+
+                    const sortTextPrefix = (this.bottomOfListSortPrefix - 1).toString();
+                    for (const hint of provider.remainingTypeHints()) {
+                        let item = new CompletionItem(this.labelFor(hint), CompletionItemKind.TypeParameter);
+                        item.sortText = sortTextPrefix + hint;
+                        items.push(item);
+                    }
+                    
+                    if (provider.typingImported) {
+                        this.pushHintsToItems(provider.remainingTypingHints(), items);
+                    }
+                    
                     return Promise.resolve(new CompletionList(items, false));  
                 }
             }
@@ -85,16 +97,8 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
      * @param precedingText The text before the active position.
      */
     private getParam(precedingText: string): string | null {
-        let param = "";
-
-        let i = precedingText.length - 1;
-        let last = precedingText[i];
-        while (last !== "," && last !== "(" && last !== "*" && i >= 0) {
-            param = precedingText[i] + param;
-            i--;
-            last = precedingText[i];
-        }
-        param = param.trim();
+        const split = precedingText.split(/[,(*]/);
+        let param = split.length > 1 ? split[split.length - 1].trim() : precedingText;
         return !param || /[!:?/\\{}.+/=)'";@&£%¤|<>$^~¨ -]/.test(param) ? null : param;
     }
     
@@ -117,7 +121,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
     private shouldProvideItems(precedingText: string, activePos: Position, doc: TextDocument): boolean {
 
         if (activePos.character > 0 && !/#/.test(precedingText)) {
-            let provide = new RegExp("^[ \t]*def [^(]+\\(", "m").test(precedingText);
+            let provide = /^[ \t]*def /.test(precedingText);
 
             if (!provide) {
                 const nLinesToCheck = activePos.line > 4 ? 4 : activePos.line;
@@ -150,7 +154,7 @@ export class ReturnHintCompletionProvider extends CompletionProvider implements 
         const line = doc.lineAt(pos);
 
         if (this.shouldProvideItems(line, pos)) {         
-            this.pushTypesToItems(Object.values(PythonType), items);
+            this.pushHintsToItems(Object.values(PythonType), items);
         }
         return Promise.resolve(new CompletionList(items, false));
     }

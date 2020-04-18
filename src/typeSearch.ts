@@ -96,8 +96,8 @@ export class TypeSearch {
 
         // Searching the import source document is not supported (yet?)
         if (!this.isImported(match[1], src.substr(match.index - match.length))) {
-            
-            if (match = this.variableSearchRegExp(match[1]).exec(src)) {
+            match = this.variableSearchRegExp(match[1]).exec(src);
+            if (match) {
                 const otherType = this.detectType(match[1]);
                 return otherType 
                     ? new VariableSearchResult(otherType, EstimationSource.ValueOfOtherVariable, valueAssignment)
