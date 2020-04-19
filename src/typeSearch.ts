@@ -152,7 +152,10 @@ export class TypeSearch {
      * @returns The type hint of the found parameter or null.
      */
     public static hintOfSimilarParam(param: string, src: string): string | null {
-        const m = new RegExp(`^[ \t]*def ${simpleIdentifier}\\([^)]*\\b${param}\\b: *([^),\\s]+)`, "m").exec(src);
+        const m = new RegExp(
+            `^[ \t]*def ${simpleIdentifier}\\([^)]*\\b${param}\\b: *([a-zA-Z_][^),\\s]+)`,
+            "m"
+        ).exec(src);
         if (m) {
             let hint = m[1].trim();
             return hint ? hint : null;

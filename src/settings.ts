@@ -5,11 +5,8 @@ import { workspace, Event, EventEmitter } from "vscode";
  */
 export class TypeHintSettings {
 
-    private searchLimit = 20;
-
-    public get fileSearchLimit() {
-        return this.searchLimit;
-    }
+    private _workspaceSearchEnabled = true;
+    private _workspaceSearchLimit = 20;
 
     constructor() {
         workspace.onDidChangeConfiguration(() => {
@@ -18,7 +15,13 @@ export class TypeHintSettings {
         });
         this.initialize();
     }
-    
+
+    public get workspaceSearchLimit() {
+        return this._workspaceSearchLimit;
+    }
+    public get workspaceSearchEnabled() {
+        return this._workspaceSearchEnabled;
+    }
     
     public readonly settingsUpdated = new EventEmitter<void>();
 
@@ -27,9 +30,13 @@ export class TypeHintSettings {
     }
 
     private initialize() {
-        const searchLimit: number | undefined = workspace.getConfiguration('workspace.search').get('limit');
-        if (searchLimit) {
-            this.searchLimit = Number.isInteger(searchLimit) ? searchLimit : Math.round(searchLimit);
+        const wsEnable: boolean | undefined = workspace.getConfiguration('workspace').get('searchEnabled');
+        const searchLimit: number | undefined = workspace.getConfiguration('workspace').get('searchLimit');
+        if (wsEnable !== undefined) {
+            this._workspaceSearchEnabled = wsEnable;
+        }
+        if (searchLimit || searchLimit === 0) {
+            this._workspaceSearchLimit = Number.isInteger(searchLimit) ? searchLimit : Math.round(searchLimit);
         }
     }
 

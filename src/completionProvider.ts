@@ -11,14 +11,18 @@ import {
     Range
 } from "vscode";
 import { TypeHintProvider } from "./typeHintProvider";
-import { paramHintTrigger, returnHintTrigger, PythonType, simpleIdentifier  } from "./python";
+import { paramHintTrigger, returnHintTrigger, PythonType, simpleIdentifier, getDataTypeContainer  } from "./python";
 import { TypeHintSettings } from "./settings";
+import { WorkspaceSearcher } from "./workspaceSearcher";
 
 
 export abstract class CompletionProvider {
 
     protected bottomOfListSortPrefix: number = 999;
 
+    /**
+     * Push type hints to the bottom of an array of completion items.
+     */
     protected pushHintsToItems(typeHints: string[], completionItems: CompletionItem[]) {
         const sortTextPrefix = this.bottomOfListSortPrefix.toString();
         for (const hint of typeHints) {
@@ -65,11 +69,21 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
 
             if (this.shouldProvideItems(precedingText, pos, doc)) {
                 const param = this.getParam(precedingText);
-                const provider = new TypeHintProvider(doc, this.settings);
-        
+                const documentText = doc.getText();
+                const typeContainer = getDataTypeContainer();
+                const provider = new TypeHintProvider(typeContainer);
+                const wsSearcher = new WorkspaceSearcher(doc.uri, this.settings, typeContainer);
+                
                 if (param) {
+                    const workspaceHintSearch = this.settings.workspaceSearchEnabled
+                        ? this.workspaceHintSearch(param, wsSearcher, documentText)
+                        : null;
                     try {
-                        this.pushEstimationsToItems(await provider.getTypeHints(param), items); 
+                        const estimations = await provider.estimateTypeHints(param, documentText);
+                        if (estimations.length > 0) {
+                            this.pushEstimationsToItems(estimations, items);
+                            wsSearcher.cancel();
+                        }
                     } catch {
                     }
 
@@ -83,12 +97,23 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
                     if (provider.typingImported) {
                         this.pushHintsToItems(provider.remainingTypingHints(), items);
                     }
-                    
+                    const hint = await workspaceHintSearch;
+                    if (hint && provider.hintNotProvided(hint)) {
+                        items.unshift(this.toSelectedCompletionItem(hint));
+                    }
                     return Promise.resolve(new CompletionList(items, false));  
                 }
             }
         }
         return Promise.resolve(null);
+    }
+
+    private async workspaceHintSearch(param: string, ws: WorkspaceSearcher, docText: string): Promise<string | null> {
+        try {
+            return ws.findHintOfSimilarParam(param, docText);
+        } catch {
+            return null;
+        }
     }
 
     /**
@@ -105,17 +130,21 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
     private pushEstimationsToItems(typeHints: string[], items: CompletionItem[]) {
 
         if (typeHints.length > 0) {
-            let item = new CompletionItem(this.labelFor(typeHints[0]), CompletionItemKind.TypeParameter);
-            item.sortText = `0${typeHints[0]}`;
-            item.preselect = true;
-            items.push(item);
+            items.push(this.toSelectedCompletionItem(typeHints[0]));
 
             for (let i = 1; i < typeHints.length; i++) {
-                item = new CompletionItem(this.labelFor(typeHints[i]), CompletionItemKind.TypeParameter);
+                let item = new CompletionItem(this.labelFor(typeHints[i]), CompletionItemKind.TypeParameter);
                 item.sortText = `${i}${typeHints[i]}`;
                 items.push(item);
             }       
         }
+    }
+
+    private toSelectedCompletionItem(typeHint: string): CompletionItem {
+        let item = new CompletionItem(this.labelFor(typeHint), CompletionItemKind.TypeParameter);
+        item.sortText = `0${typeHint}`;
+        item.preselect = true;
+        return item;
     }
 
     private shouldProvideItems(precedingText: string, activePos: Position, doc: TextDocument): boolean {
