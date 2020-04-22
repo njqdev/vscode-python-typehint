@@ -1,7 +1,7 @@
 {
 	"name": "vscode-python-typehint",
     "displayName": "Python Type Hint",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "publisher": "njqdev",
     "description": "Type hint completion for Python.",
     "icon": "images/icon.png",
@@ -46,7 +46,7 @@
                 "workspace.searchEnabled": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Search other files in the workspace when estimating types for a parameter. Disabling this will increase type hinting speed."
+                    "description": "If enabled, other files in the workspace are searched when estimating types for a parameter. Disabling this will increase performance."
                   },
               "workspace.searchLimit": {
                 "type": "number",

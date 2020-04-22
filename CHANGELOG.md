@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.1.1] - 2020-04-22
+
+* Fixed type hints not being provided for async functions.
+
 ## [1.1.0] - 2020-04-19
 
 ### Improvements:

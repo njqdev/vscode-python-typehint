@@ -51,6 +51,20 @@ suite('ParamHintCompletionProvider', () => {
         let actual = await providerResult(provider, data);
         assert.notEqual(actual, null);
     });
+
+    test("provides items for async function", async () => {
+        let data = "async def test(test:";
+        let pos = new vsc.Position(0, data.length);
+        let expected = null;
+        let actual = await provideCompletionItems(provider, data, pos);
+        assert.notEqual(actual, null, messageFor({ data, expected }, actual));
+
+        let line2 = "        test:";
+        data = "async def test(\n" + line2;
+        pos = new vsc.Position(1, line2.length);
+        actual = await provideCompletionItems(provider, data, pos);
+        assert.notEqual(actual, null, messageFor({ data, expected }, actual));
+    });
     
     test("does not provide items unless a function def is detected", async () => {
         let text = " :";
@@ -116,7 +130,7 @@ async function providerResult(
     functionText: string,
     trailingText?: string
 ): Promise<vsc.CompletionList | null> {
-    let content = `def func(${functionText}`;
+    let content = `    def func(${functionText}`;
     const lines: string[] = content.split("\n");
     const lastLineIdx = lines.length - 1;
     const lastPos = new vsc.Position(lastLineIdx, lines[lastLineIdx].length);
