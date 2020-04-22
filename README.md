@@ -1,17 +1,5 @@
 # Python Type Hint
 
-<p>
-  <a href="https://img.shields.io/github/v/release/njqdev/vscode-python-typehint.svg?style=flat">
-    <img src="https://img.shields.io/github/v/release/njqdev/vscode-python-typehint.svg?style=flat" />
-  </a>
-  <a href="https://img.shields.io/visual-studio-marketplace/i/njqdev.vscode-python-typehint">
-    <img src="https://img.shields.io/visual-studio-marketplace/i/njqdev.vscode-python-typehint" alt="Installs"></img>
-  </a>
-  <a href="https://www.codefactor.io/repository/github/njqdev/vscode-python-typehint/badge">
-    <img src="https://www.codefactor.io/repository/github/njqdev/vscode-python-typehint/badge" alt="CodeFactor"></img>
-  </a>
-</p>
-
 Provides type hint auto-completion for Python, with completion items for built-in types, classes and the typing module.
 
 
@@ -40,4 +28,18 @@ The extension can found on the [Visual Studio Marketplace](https://marketplace.v
 
 * The difference between function and class constructor calls when detecting types is determined by the first letter being upper case (unless the class or function is defined in the currently edited document).
 
+
 -------------------------------------------------------------------------------------------
+
+
+<p>
+  <a href="https://img.shields.io/github/v/release/njqdev/vscode-python-typehint.svg?style=flat">
+    <img src="https://img.shields.io/github/v/release/njqdev/vscode-python-typehint.svg?style=flat" />
+  </a>
+  <a href="https://img.shields.io/visual-studio-marketplace/i/njqdev.vscode-python-typehint">
+    <img src="https://img.shields.io/visual-studio-marketplace/i/njqdev.vscode-python-typehint" alt="Installs"></img>
+  </a>
+  <a href="https://www.codefactor.io/repository/github/njqdev/vscode-python-typehint/badge">
+    <img src="https://www.codefactor.io/repository/github/njqdev/vscode-python-typehint/badge" alt="CodeFactor"></img>
+  </a>
+</p>
