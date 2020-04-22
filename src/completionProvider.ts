@@ -21,7 +21,7 @@ export abstract class CompletionProvider {
     protected bottomOfListSortPrefix: number = 999;
 
     /**
-     * Push type hints to the bottom of an array of completion items.
+     * Push type hints to the end of an array of completion items.
      */
     protected pushHintsToItems(typeHints: string[], completionItems: CompletionItem[]) {
         const sortTextPrefix = this.bottomOfListSortPrefix.toString();

@@ -6,13 +6,13 @@
 
 ## [1.1.0] - 2020-04-19
 
-### Improvements:
+### Improved:
 
-* Added a new setting for disabling workspace searching.
+* New setting for disabling workspace searching.
 * More default hints are provided for the typing module.
-* Overall speed improvements.
+* Overall speed.
 
-### Fixes:
+### Fixed:
 
 * Setting the workspace search limit to 0 not working.
 
