@@ -29,13 +29,13 @@ export class VariableSearchResult {
 export class TypeSearch {
     
     /**
-     * Searches for a class with the same name as object and returns the name if found.
+     * Searches for a class with the same name as a value and returns the name if found.
      * 
-     * @param object The object.
+     * @param value The value.
      * @param src The source code to search.
      */
-    public static classWithSameName(object: string, src: string): string | null {
-        const clsMatch = new RegExp(`^ *class +(${object})[(:]`, "mi").exec(src);
+    public static classWithSameName(value: string, src: string): string | null {
+        const clsMatch = new RegExp(`^ *class +(${value})[(:]`, "mi").exec(src);
         return clsMatch ? clsMatch[1] : null;
     }
 
@@ -44,7 +44,6 @@ export class TypeSearch {
      * 
      * @param param The parameter name.
      * @param src The source code to search.
-     * @returns A search result or null.
      */
     public static async variableWithSameName(param: string, src: string): Promise<VariableSearchResult | null> {
         let match = this.variableSearchRegExp(param).exec(src);
@@ -148,7 +147,7 @@ export class TypeSearch {
      * Searches for a previously hinted param with the same name.
      * 
      * @param param The parameter name.
-     * @param src The document text to search.
+     * @param src The source code to search.
      * @returns The type hint of the found parameter or null.
      */
     public static hintOfSimilarParam(param: string, src: string): string | null {
@@ -194,12 +193,12 @@ export class TypeSearch {
     }
 
     /**
-     * Detects if a value is imported in a document.
+     * Detects if a value is imported and returns the imported value.  
+     * For instance, if 'from x import y' is detected for a value of 'x.y', 'y' is returned.
      * 
      * @param value The value.
-     * @param src The document text to search.
+     * @param src The source code to search.
      * @param considerAsImports Also search for 'import x as value' imports. 
-     * @returns The imported value.
      */
     public static findImport(value: string, src: string, considerAsImports: boolean = true): string | null {
 
@@ -211,16 +210,16 @@ export class TypeSearch {
             let match = null;
 
             if (s.length === 2 && module !== type) {
+                // Check if module is a module or a class
                 match = new RegExp(
                     `^[ \t]*import +${module}|^[ \t]*from ${simpleIdentifier} import (${module})`, "m"
                 ).exec(src);
                 if (match) {    
-                    // Return 'Object.Type' for 'from x import Object'
                     return match[1] ? `${match[1]}.${type}` : value;
                 }
             }
             match = new RegExp(`^[ \t]*import +${module}|^[ \t]*from ${module} import (${type})`, "m").exec(src);
-            return match ? match[1] ? match[1] : value : null;
+            return match ? match[1] ? type : value : null;
         }
         return this.isImported(value, src, considerAsImports) ? value : null;
     }
