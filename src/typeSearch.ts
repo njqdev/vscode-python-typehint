@@ -35,7 +35,7 @@ export class TypeSearch {
      * @param src The source code to search.
      */
     public static classWithSameName(value: string, src: string): string | null {
-        const clsMatch = new RegExp(`^ *class +(${value})[(:]`, "mi").exec(src);
+        const clsMatch = new RegExp(`^[ \t]*class +(${value})[(:]`, "mi").exec(src);
         return clsMatch ? clsMatch[1] : null;
     }
 
@@ -144,7 +144,7 @@ export class TypeSearch {
     }
 
     /**
-     * Searches for a previously hinted param with the same name.
+     * Searches for a previously hinted parameter with the same name.
      * 
      * @param param The parameter name.
      * @param src The source code to search.

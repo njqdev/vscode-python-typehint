@@ -115,7 +115,7 @@ suite('TypingHintProvider', () => {
         
         function getTypingHints(provider: TypingHintProvider, testCase: TestCase, type: PythonType) {
             const actual = provider.getHints(varSearchResult(type, testCase.data));
-            assert.deepEqual(actual, testCase.expected, messageFor(testCase, actual));
+            assert.deepEqual(actual, testCase.expected, messageFor(testCase.data, testCase.expected, actual));
         }
     });
 

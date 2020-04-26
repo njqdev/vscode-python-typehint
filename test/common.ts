@@ -12,8 +12,8 @@ export class SetupError extends Error {
     }
 }
 
-export function messageFor(testCase: TestCase, actual: any): string {
-   return `${actual} == ${testCase.expected}. \n[Test data]\n${testCase.data}`;
+export function messageFor(testData: any, expected: any, actual: any): string {
+   return `${actual} == ${expected}. \n[Test data]\n${testData}`;
 };
 
 export function varSearchResult(typeName: string, valueAssignment: string): VariableSearchResult {

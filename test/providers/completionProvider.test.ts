@@ -9,12 +9,9 @@ suite('ParamHintCompletionProvider', () => {
     const provider = new ParamHintCompletionProvider(new TypeHintSettings());
 
     test("provides items for first param", async () => {
-        let param = "paramName:";
-        let actual = await providerResult(provider, param, "):\n\nparamName = 12");
-
-        // Multiple asserts, so if the test fails it is more obvious why.
+        let param = "param_1:";
+        let actual = await providerResult(provider, param);
         assert.notEqual(actual, null);
-        assert.equal(actual?.items[0].label.trim(), PythonType.Int);
     });
 
     test("provides items for non-first param", async () => {
@@ -26,21 +23,18 @@ suite('ParamHintCompletionProvider', () => {
 
     test("provides items for param on new line", async () => {
         let param = "\n    paramName:";
-        let actual = await providerResult(provider, param, "\n\nparamName = 12");
+        let actual = await providerResult(provider, param);
         assert.notEqual(actual, null);
-        assert.equal(actual?.items[0].label.trim(), PythonType.Int);
 
         param = "\n\tparamName:";
-        actual = await providerResult(provider, param, "\n\nparamName = 12");
+        actual = await providerResult(provider, param);
         assert.notEqual(actual, null);
-        assert.equal(actual?.items[0].label.trim(), PythonType.Int);
     });
     
     test("provides items for param with legal non-ascii chars", async () => {
         let param = "a変な:";
-        let actual = await providerResult(provider, param, "\n\na変な = 12");
+        let actual = await providerResult(provider, param);
         assert.notEqual(actual, null);
-        assert.equal(actual?.items[0].label.trim(), PythonType.Int);
     });
 
     test("provides items for nestled function", async () => {
@@ -53,17 +47,36 @@ suite('ParamHintCompletionProvider', () => {
     });
 
     test("provides items for async function", async () => {
-        let data = "async def test(test:";
+        let data = "async def func(test:";
         let pos = new vsc.Position(0, data.length);
         let expected = null;
         let actual = await provideCompletionItems(provider, data, pos);
-        assert.notEqual(actual, null, messageFor({ data, expected }, actual));
+        assert.notEqual(actual, null, messageFor(data, expected, actual));
 
         let line2 = "        test:";
-        data = "async def test(\n" + line2;
+        data = "async def func(\n" + line2;
         pos = new vsc.Position(1, line2.length);
         actual = await provideCompletionItems(provider, data, pos);
-        assert.notEqual(actual, null, messageFor({ data, expected }, actual));
+        assert.notEqual(actual, null, messageFor(data, expected, actual));
+    });
+    
+    test("provides default items", async () => {
+        let param = "notFound:";
+        let expected = Object.values(PythonType).sort();
+        let result = await providerResult(provider, param);
+        
+        assert.notEqual(result, null);
+        let actual: string[] = [];
+        result?.items.forEach((item) => { actual.push(item.label.trim()); });
+
+        assert.deepEqual(actual, expected);
+    });
+
+    test("provides type estimations + default items", async () => {
+        let param = "param:";
+        let expected = Object.values(PythonType).length + 1;
+        let result = await providerResult(provider, param, "\n\nparam = Class()");
+        assert.equal(result?.items.length, expected);
     });
     
     test("does not provide items unless a function def is detected", async () => {
@@ -82,32 +95,23 @@ suite('ParamHintCompletionProvider', () => {
         let data = "):\n    d = ', not_a_param:";
         let expected = null;
         let actual = await providerResult(provider, data);
-        assert.equal(actual, expected, messageFor({ data, expected }, actual));
+        assert.equal(actual, expected, messageFor(data, expected, actual));
 
-        data = `self, lt: List[Tuple[str]],
+        data = `self,
                 s: str,
                 f: float,
                 i: int):
     v = ', not_a_param:`;
         actual = await providerResult(provider, data);
-        assert.equal(actual, null, messageFor({ data, expected }, actual));
+        assert.equal(actual, null, messageFor(data, expected, actual));
         
         data = "):\n    :";
         actual = await providerResult(provider, data);
-        assert.equal(actual, expected, messageFor({ data, expected }, actual));
+        assert.equal(actual, expected, messageFor(data, expected, actual));
 
         data = "):\n d = { key:";
         actual = await providerResult(provider, data);
-        assert.equal(actual, null, messageFor({ data, expected }, actual));
-
-        data = `
-        def __init__(self, lt: List[Tuple[str]],
-            s: str,
-            f: float,
-            i: int):
-            v = ', not_a_param:`;
-        actual = await providerResult(provider, data);
-        assert.equal(actual, null, messageFor({ data, expected }, actual));
+        assert.equal(actual, null, messageFor(data, expected, actual));
     });
 
     test("does not provide items for end of function definition", async () => {
