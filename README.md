@@ -18,7 +18,8 @@ Provides type hint auto-completion for Python, with completion items for built-i
 
 | Name | Description | Default
 |---|---|---|
-| workspace.search.limit | _(number)_ The maximum number of files searched when estimating types for a parameter. If 0, only the current editor document is searched, which increases speed but can reduce estimation accuracy. | 20
+| workspace.searchEnabled | _(boolean)_ If enabled, other files in the workspace are searched when estimating types for a parameter. Disabling this will increase performance, but may reduce estimation accuracy. | true
+| workspace.searchLimit | _(number)_ The maximum number of files searched in a workspace search. | 20
 
 ## Known Issues
 

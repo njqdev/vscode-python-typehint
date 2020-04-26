@@ -46,7 +46,7 @@
                 "workspace.searchEnabled": {
                     "type": "boolean",
                     "default": true,
-                    "description": "If enabled, other files in the workspace are searched when estimating types for a parameter. Disabling this will increase performance."
+                    "description": "If enabled, other files in the workspace are searched when estimating types for a parameter. Disabling this will increase performance, but may reduce estimation accuracy."
                   },
               "workspace.searchLimit": {
                 "type": "number",
