@@ -11,7 +11,7 @@ import {
     Range
 } from "vscode";
 import { TypeHintProvider } from "./typeHintProvider";
-import { paramHintTrigger, returnHintTrigger, PythonType, simpleIdentifier, getDataTypeContainer  } from "./python";
+import { paramHintTrigger, returnHintTrigger, PythonType, getDataTypeContainer  } from "./python";
 import { TypeHintSettings } from "./settings";
 import { WorkspaceSearcher } from "./workspaceSearcher";
 
@@ -157,7 +157,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
                 const previousLines = doc.getText(
                     new Range(doc.lineAt(activePos.line - nLinesToCheck).range.start, activePos)
                 );
-                provide = new RegExp(`^[ \t]*(async *)?def(?![\\s\\S]+(\\):|-> *${simpleIdentifier}:))`, "m").test(previousLines);
+                provide = new RegExp(`^[ \t]*(async *)?def(?![\\s\\S]+(\\):|-> *[^:\\s]+:))`, "m").test(previousLines);
             }
             return provide;
         }

@@ -96,20 +96,36 @@ suite('ParamHintCompletionProvider', () => {
         let expected = null;
         let actual = await providerResult(provider, data);
         assert.equal(actual, expected, messageFor(data, expected, actual));
-
-        data = `self,
-                s: str,
-                f: float,
-                i: int):
-    v = ', not_a_param:`;
-        actual = await providerResult(provider, data);
-        assert.equal(actual, null, messageFor(data, expected, actual));
         
         data = "):\n    :";
         actual = await providerResult(provider, data);
         assert.equal(actual, expected, messageFor(data, expected, actual));
 
         data = "):\n d = { key:";
+        actual = await providerResult(provider, data);
+        assert.equal(actual, null, messageFor(data, expected, actual));
+
+        data = `self,
+        s: str,
+        f: float,
+        i: int):
+    v = ', not_a_param:`;
+        actual = await providerResult(provider, data);
+        assert.equal(actual, null, messageFor(data, expected, actual));
+
+        data = `self,
+        s: str,
+        f: float,
+        i: int) -> int:
+    v = ', not_a_param:`;
+        actual = await providerResult(provider, data);
+        assert.equal(actual, null, messageFor(data, expected, actual));
+
+        data = `self,
+        s: str,
+        f: float,
+        i: int) -> 変な:
+    v = ', not_a_param:`;
         actual = await providerResult(provider, data);
         assert.equal(actual, null, messageFor(data, expected, actual));
     });

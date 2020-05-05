@@ -1,4 +1,4 @@
-import { simpleIdentifier, PythonType } from "./python";
+import { moduleName, PythonType } from "./python";
 
 /**
  * The source of a type estimation.
@@ -57,7 +57,7 @@ export class TypeSearch {
             return new VariableSearchResult(typeName, EstimationSource.Value, valueAssignment);
         }
         
-        match = new RegExp(`^ *(${simpleIdentifier})\\(?`).exec(valueAssignment);
+        match = new RegExp(`^ *([^(\\s#"']+)\\(?`).exec(valueAssignment);
         if (!match) {
             return null;
         }
@@ -210,7 +210,7 @@ export class TypeSearch {
             if (s.length === 2 && module !== type) {
                 // Check if module is a module or a class
                 match = new RegExp(
-                    `^[ \t]*import +${module}|^[ \t]*from ${simpleIdentifier} import (${module})`, "m"
+                    `^[ \t]*import +${module}|^[ \t]*from ${moduleName} import (${module})`, "m"
                 ).exec(src);
                 if (match) {    
                     return match[1] ? `${match[1]}.${type}` : value;
@@ -227,9 +227,9 @@ export class TypeSearch {
      */
     private static isImported(value: string, src: string, checkForAsImports: boolean = true): boolean {
 
-        let exp = `^[ \t]*(from +${simpleIdentifier} +import +${value}`;
+        let exp = `^[ \t]*(from +${moduleName} +import +${value}`;
         if (checkForAsImports) {
-            exp += `|from +${simpleIdentifier} +import +${simpleIdentifier} +as +${value}`;
+            exp += `|from +${moduleName} +import +${moduleName} +as +${value}`;
         }
         exp += ")";
         return new RegExp(exp,"m").test(src);
