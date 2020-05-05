@@ -14,6 +14,7 @@ import { TypeHintProvider } from "./typeHintProvider";
 import { paramHintTrigger, returnHintTrigger, PythonType, getDataTypeContainer  } from "./python";
 import { TypeHintSettings } from "./settings";
 import { WorkspaceSearcher } from "./workspaceSearcher";
+import { TypingHintProvider } from "./typingHintProvider";
 
 
 export abstract class CompletionProvider {
@@ -182,7 +183,12 @@ export class ReturnHintCompletionProvider extends CompletionProvider implements 
         const items: CompletionItem[] = [];
         const line = doc.lineAt(pos);
 
-        if (this.shouldProvideItems(line, pos)) {         
+        if (this.shouldProvideItems(line, pos)) {      
+            const provider = new TypingHintProvider(getDataTypeContainer());
+            await provider.detectTypingImport(doc.getText());
+            this.pushHintsToItems(provider.getRemainingHints(), items);
+            this.bottomOfListSortPrefix--;   
+
             this.pushHintsToItems(Object.values(PythonType), items);
         }
         return Promise.resolve(new CompletionList(items, false));
