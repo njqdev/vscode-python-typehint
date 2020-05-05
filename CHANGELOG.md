@@ -1,5 +1,16 @@
 # Change Log
 
+## [1.2.0] - 2020-05-05
+
+### Added:
+
+* Return type hints for the typing module
+* Support for non-ASCII class names
+
+### Fixed:
+
+* Default parameter values sometimes being provided within type hint items
+
 ## [1.1.2] - 2020-04-22
 
 * Fixed type hints not being provided for async functions.
