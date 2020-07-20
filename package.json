@@ -1,26 +1,26 @@
 {
 	"name": "vscode-python-typehint",
-    "displayName": "Python Type Hint",
-    "version": "1.2.0",
-    "publisher": "njqdev",
-    "description": "Type hint completion for Python.",
-    "icon": "images/icon.png",
+	"displayName": "Python Type Hint",
+	"version": "1.2.0",
+	"publisher": "njqdev",
+	"description": "Type hint completion for Python.",
+	"icon": "images/icon.png",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/njqdev/vscode-python-typehint"
 	},
-    "license": "MIT",
+	"license": "MIT",
 	"categories": [
 		"Programming Languages"
-    ],
-    "keywords": [
-        "Python",
-        "typehint",
-        "completion",
-        "autocompletion",
-        "parameter"
-    ],
-    "engines": {
+	],
+	"keywords": [
+		"Python",
+		"typehint",
+		"completion",
+		"autocompletion",
+		"parameter"
+	],
+	"engines": {
 		"vscode": "^1.43.0"
 	},
 	"activationEvents": [
@@ -39,35 +39,33 @@
 					".py"
 				]
 			}
-        ],
-        "configuration": {
-            "title": "Python Type Hint",
-            "properties": {
-                "workspace.searchEnabled": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "If enabled, other files in the workspace are searched when estimating types for a parameter. Disabling this will increase performance, but may reduce estimation accuracy."
-                  },
-              "workspace.searchLimit": {
-                "type": "number",
-                "default": 20,
-                "description": "The maximum number of files searched in a workspace search."
-              }
-            }
-        }
+		],
+		"configuration": {
+			"title": "Python Type Hint",
+			"properties": {
+				"workspace.searchEnabled": {
+					"type": "boolean",
+					"default": true,
+					"description": "If enabled, other files in the workspace are searched when estimating types for a parameter. Disabling this will increase performance, but may reduce estimation accuracy."
+				},
+				"workspace.searchLimit": {
+					"type": "number",
+					"default": 20,
+					"description": "The maximum number of files searched in a workspace search."
+				}
+			}
+		}
 	},
 	"scripts": {
 		"package": "vsce package",
-        "publish": "vsce publish",
-    
-        "vscode:prepublish": "webpack --mode production",
-        "compile": "webpack --mode none",
-        "watch": "webpack --mode none --watch",
-    
-        "postinstall": "node node_modules/vscode/bin/install",
-        "just-test": "node node_modules/vscode/bin/test",
-        "test-compile": "tsc -p ./ && npm run compile",
-        "test": "npm run test-compile && node node_modules/vscode/bin/test"
+		"publish": "vsce publish",
+		"vscode:prepublish": "webpack --mode production",
+		"compile": "webpack --mode none",
+		"watch": "webpack --mode none --watch",
+		"postinstall": "node node_modules/vscode/bin/install",
+		"just-test": "node node_modules/vscode/bin/test",
+		"test-compile": "tsc -p ./ && npm run compile",
+		"test": "npm run test-compile && node node_modules/vscode/bin/test"
 	},
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
