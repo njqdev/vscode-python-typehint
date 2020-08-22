@@ -23,6 +23,8 @@ Provides type hint auto-completion for Python, with completion items for built-i
 
 ## Known Issues
 
+* Invalid code in the same or other workspace Python files can result in incorrect type predictions.
+
 * The difference between function and class constructor calls when detecting types is determined by the first letter being upper case (unless the class or function is defined in the currently edited document).
 
 ## Installation

@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.3.0] - 2020-08-22
+
+* Type hints for the typing module are now provided at the bottom of the list by default
+* Fixed the first type hint not always being pre-selected
+* Fixed incorrectly sorted type hints in some cases
+
 ## [1.2.0] - 2020-05-05
 
 ### Added:
