@@ -53,11 +53,10 @@ export class TypeHintProvider {
             this.tryAddTypingHint(typeName, typeHints);
         }
 
-        if (
-            typeHints.length > 0 
+        const typesFound = typeHints.length > 0 
             || this.tryAdd(TypeSearch.hintOfSimilarParam(param, documentText), typeHints)
-            || this.tryAdd(TypeSearch.classWithSameName(param, documentText), typeHints)
-        ) {
+            || this.tryAdd(TypeSearch.classWithSameName(param, documentText), typeHints);
+        if (typesFound) {
             return typeHints;
         }
 

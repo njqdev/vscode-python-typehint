@@ -57,7 +57,7 @@ export class TypeSearch {
             return new VariableSearchResult(typeName, EstimationSource.Value, valueAssignment);
         }
         
-        match = new RegExp(`^ *([^(\\s#"']+)\\(?`).exec(valueAssignment);
+        match = /^ *([^(\s#"']+)\(?/.exec(valueAssignment);
         if (!match) {
             return null;
         }
@@ -73,27 +73,12 @@ export class TypeSearch {
                     return new VariableSearchResult(value, EstimationSource.Value, valueAssignment);
                 }
             } else {
-                if (value.includes(".")) {
-                    let split = value.split(".");
-                    value = split[split.length - 1];
-                }
-                // Find the function definition and check if the return type is hinted
-                const regExp = new RegExp(`^[ \t]*def ${value}\\([^)]*\\) *-> *([a-zA-Z_][a-zA-Z0-9_.\\[\\]]+)`, "m");
-
-                const hintedCallMatch = regExp.exec(src);
-
-                if (hintedCallMatch && hintedCallMatch.length === 2) {
-                    return new VariableSearchResult(
-                        hintedCallMatch[1],
-                        EstimationSource.FunctionDefinition,
-                        valueAssignment
-                    );
-                }
+                return this.searchForHintedFunctionCall(value, src, valueAssignment);
             }
             return null;
         }
 
-        // Searching the import source document is not supported (yet?)
+        // Searching the import source document is not supported
         if (!this.isImported(match[1], src.substr(match.index - match.length))) {
             match = this.variableSearchRegExp(match[1]).exec(src);
             if (match) {
@@ -102,6 +87,30 @@ export class TypeSearch {
                     ? new VariableSearchResult(otherType, EstimationSource.ValueOfOtherVariable, valueAssignment)
                     : null;
             }
+        }
+        return null;
+    }
+
+    private static searchForHintedFunctionCall(
+        value: string,
+        src: string,
+        valueAssignment: string
+    ): VariableSearchResult | null {
+        if (value.includes(".")) {
+            let split = value.split(".");
+            value = split[split.length - 1];
+        }
+
+        const regExp = new RegExp(`^[ \t]*def ${value}\\([^)]*\\) *-> *([a-zA-Z_][a-zA-Z0-9_.\\[\\]]+)`, "m");
+
+        const hintedCallMatch = regExp.exec(src);
+
+        if (hintedCallMatch && hintedCallMatch.length === 2) {
+            return new VariableSearchResult(
+                hintedCallMatch[1],
+                EstimationSource.FunctionDefinition,
+                valueAssignment
+            );
         }
         return null;
     }
@@ -171,7 +180,7 @@ export class TypeSearch {
         if (searchResult.estimationSource === EstimationSource.ClassDefinition) {
             return false;
         }
-        const regExp = new RegExp(" if +[^ ]+ +else( +[^ ]+) *$");
+        const regExp = / if +[^ ]+ +else( +[^ ]+) *$/;
 
         let ternaryMatch = regExp.exec(searchResult.valueAssignment);
         while (ternaryMatch) {
@@ -232,7 +241,7 @@ export class TypeSearch {
             exp += `|from +${moduleName} +import +${moduleName} +as +${value}`;
         }
         exp += ")";
-        return new RegExp(exp,"m").test(src);
+        return new RegExp(exp, "m").test(src);
     }
 
     private static isProbablyAClass(lineText: string): boolean {

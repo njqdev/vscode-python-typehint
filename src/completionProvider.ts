@@ -183,7 +183,7 @@ export class ReturnHintCompletionProvider extends CompletionProvider implements 
         const items: CompletionItem[] = [];
         const line = doc.lineAt(pos);
 
-        if (this.shouldProvideItems(line, pos)) {      
+        if (this.shouldProvideItems(line, pos)) {
             const provider = new TypingHintProvider(getDataTypeContainer());
             await provider.detectTypingImport(doc.getText());
             this.pushHintsToItems(provider.getRemainingHints(), items);
@@ -197,8 +197,7 @@ export class ReturnHintCompletionProvider extends CompletionProvider implements 
     private shouldProvideItems(line: TextLine, pos: Position): boolean {
 
         if (pos.character > 0 && line.text.substr(pos.character - 2, 2) === "->") {
-
-            return new RegExp("\\) *->[: ]*$", "m").test(line.text);
+            return /\) *->[: ]*$/m.test(line.text);
         }
         return false;
     }
