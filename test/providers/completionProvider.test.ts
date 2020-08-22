@@ -60,23 +60,25 @@ suite('ParamHintCompletionProvider', () => {
         assert.notEqual(actual, null, messageFor(data, expected, actual));
     });
     
-    test("provides default items", async () => {
+    test("provides default items if nothing is detected", async () => {
         let param = "notFound:";
-        let expected = Object.values(PythonType).sort();
+        let expected = typeHints().concat(typingHints());
         let result = await providerResult(provider, param);
         
         assert.notEqual(result, null);
-        let actual: string[] = [];
-        result?.items.forEach((item) => { actual.push(item.label.trim()); });
-
+        const actual: string[] | undefined = result?.items.map(item => item.label.trim());
         assert.deepEqual(actual, expected);
     });
 
     test("provides type estimations + default items", async () => {
         let param = "param:";
-        let expected = Object.values(PythonType).length + 1;
+        let expected = ["Class"].concat(typeHints()).concat(typingHints());
+
         let result = await providerResult(provider, param, "\n\nparam = Class()");
-        assert.equal(result?.items.length, expected);
+
+        assert.notEqual(result, null);
+        const actual: string[] | undefined = result?.items.map(item => item.label.trim());
+        assert.deepEqual(actual, expected);
     });
     
     test("does not provide items unless a function def is detected", async () => {
@@ -177,3 +179,19 @@ async function provideCompletionItems(
 
     return provider.provideCompletionItems(doc, pos, token, ctx);
 }
+
+const typeHints = (): string[] => Object.values(PythonType).sort();
+
+const typingHints = (): string[] => {
+    const prefix = "typing.";
+    return [
+        `Dict[`,
+        `List[`,
+        `Set[`,
+        `Tuple[`,
+        `${prefix}Dict[`,
+        `${prefix}List[`,
+        `${prefix}Set[`,
+        `${prefix}Tuple[`
+    ];
+};

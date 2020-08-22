@@ -19,18 +19,35 @@ import { TypingHintProvider } from "./typingHintProvider";
 
 export abstract class CompletionProvider {
 
-    protected bottomOfListSortPrefix: number = 999;
+    protected itemSortPrefix: number = 90;
 
     /**
      * Push type hints to the end of an array of completion items.
      */
-    protected pushHintsToItems(typeHints: string[], completionItems: CompletionItem[]) {
-        const sortTextPrefix = this.bottomOfListSortPrefix.toString();
-        for (const hint of typeHints) {
-            const item = new CompletionItem(this.labelFor(hint), CompletionItemKind.TypeParameter);
-            item.sortText = sortTextPrefix + hint;
-            completionItems.push(item);
+    protected pushHintsToItems(typeHints: string[], completionItems: CompletionItem[], firstItemSelected: boolean) {
+        const sortTextPrefix = this.itemSortPrefix.toString();
+        completionItems.push(
+            firstItemSelected 
+                ? this.selectedCompletionItem(typeHints[0])
+                : this.newCompletionitem(typeHints[0], sortTextPrefix)
+        );
+
+        for (let i = 1; i < typeHints.length; i++) {
+            completionItems.push(this.newCompletionitem(typeHints[i], sortTextPrefix));
         }
+    }
+
+    private newCompletionitem = (hint: string, sortTextPrefix: string): CompletionItem => {
+        const item = new CompletionItem(this.labelFor(hint), CompletionItemKind.TypeParameter);
+        item.sortText = sortTextPrefix + hint;
+        return item;
+    };
+
+    protected selectedCompletionItem(typeHint: string, sortTextPrefix: string = "0b"): CompletionItem {
+        let item = new CompletionItem(this.labelFor(typeHint), CompletionItemKind.TypeParameter);
+        item.sortText = `${sortTextPrefix}${typeHint}`;
+        item.preselect = true;
+        return item;
     }
 
     protected labelFor(typeHint: string): string {
@@ -74,13 +91,14 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
                 const typeContainer = getDataTypeContainer();
                 const provider = new TypeHintProvider(typeContainer);
                 const wsSearcher = new WorkspaceSearcher(doc.uri, this.settings, typeContainer);
-                
+                let estimations: string[] = [];
+
                 if (param) {
                     const workspaceHintSearch = this.settings.workspaceSearchEnabled
                         ? this.workspaceHintSearch(param, wsSearcher, documentText)
                         : null;
                     try {
-                        const estimations = await provider.estimateTypeHints(param, documentText);
+                        estimations = await provider.estimateTypeHints(param, documentText);
                         if (estimations.length > 0) {
                             this.pushEstimationsToItems(estimations, items);
                             wsSearcher.cancel();
@@ -88,19 +106,13 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
                     } catch {
                     }
 
-                    const sortTextPrefix = (this.bottomOfListSortPrefix - 1).toString();
-                    for (const hint of provider.remainingTypeHints()) {
-                        let item = new CompletionItem(this.labelFor(hint), CompletionItemKind.TypeParameter);
-                        item.sortText = sortTextPrefix + hint;
-                        items.push(item);
-                    }
-                    
-                    if (provider.typingImported) {
-                        this.pushHintsToItems(provider.remainingTypingHints(), items);
-                    }
+                    this.pushHintsToItems(provider.remainingTypeHints(), items, estimations.length === 0);
+                    this.itemSortPrefix++;
+                    this.pushHintsToItems(provider.remainingTypingHints(), items, false);
+
                     const hint = await workspaceHintSearch;
                     if (hint && provider.hintNotProvided(hint)) {
-                        items.unshift(this.toSelectedCompletionItem(hint));
+                        items.unshift(this.selectedCompletionItem(hint, "0a"));
                     }
                     return Promise.resolve(new CompletionList(items, false));  
                 }
@@ -131,7 +143,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
     private pushEstimationsToItems(typeHints: string[], items: CompletionItem[]) {
 
         if (typeHints.length > 0) {
-            items.push(this.toSelectedCompletionItem(typeHints[0]));
+            items.push(this.selectedCompletionItem(typeHints[0]));
 
             for (let i = 1; i < typeHints.length; i++) {
                 let item = new CompletionItem(this.labelFor(typeHints[i]), CompletionItemKind.TypeParameter);
@@ -139,13 +151,6 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
                 items.push(item);
             }       
         }
-    }
-
-    private toSelectedCompletionItem(typeHint: string): CompletionItem {
-        let item = new CompletionItem(this.labelFor(typeHint), CompletionItemKind.TypeParameter);
-        item.sortText = `0${typeHint}`;
-        item.preselect = true;
-        return item;
     }
 
     private shouldProvideItems(precedingText: string, activePos: Position, doc: TextDocument): boolean {
@@ -185,11 +190,13 @@ export class ReturnHintCompletionProvider extends CompletionProvider implements 
 
         if (this.shouldProvideItems(line, pos)) {
             const provider = new TypingHintProvider(getDataTypeContainer());
-            await provider.detectTypingImport(doc.getText());
-            this.pushHintsToItems(provider.getRemainingHints(), items);
-            this.bottomOfListSortPrefix--;   
+            const detectTypingImport = provider.detectTypingImport(doc.getText());
 
-            this.pushHintsToItems(Object.values(PythonType), items);
+            this.pushHintsToItems(Object.values(PythonType), items, true);
+            this.itemSortPrefix++;
+
+            await detectTypingImport;
+            this.pushHintsToItems(provider.getRemainingHints(), items, false);
         }
         return Promise.resolve(new CompletionList(items, false));
     }
