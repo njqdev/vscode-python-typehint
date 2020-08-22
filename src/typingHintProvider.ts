@@ -8,6 +8,7 @@ import { VariableSearchResult, TypeSearch } from "./typeSearch";
 export class TypingHintProvider {
 
     private typeContainer: DataTypeContainer;
+    private typingImportDetected: boolean = false;
     private fromTypingImport: boolean = false;
     private providedTypes: DataType[] = [];
     private typingPrefix: string = "typing";
@@ -28,27 +29,20 @@ export class TypingHintProvider {
      * @returns True if typing is imported.
      */
     public async detectTypingImport(docText: string): Promise<boolean> {
-        let m = new RegExp(
-            `^[ \t]*from typing import +([A-Z][a-zA-Z0-9 ,]+)`,
-            "m"
-        ).exec(docText);
-        
-        if (m) {
+
+        if (/^[ \t]*from typing import +([A-Z][a-zA-Z0-9 ,]+)/m.exec(docText)) {
             this.fromTypingImport = true;
-            return true;
+            this.typingImportDetected = true;
         } else {
-            m = new RegExp(
-                `^[ \t]*(import +typing +as +([a-zA-Z_][a-zA-Z0-9_-]*)|import +typing)`,
-                "m"
-            ).exec(docText);
-            if (m) {
-                if (m[2]) {
-                    this.typingPrefix = m[2];
+            const match = /^[ \t]*(import +typing +as +([a-zA-Z_][a-zA-Z0-9_-]*)|import +typing)/m.exec(docText);
+            if (match) {
+                if (match[2]) {
+                    this.typingPrefix = match[2];
                 }
-                return true;
+                this.typingImportDetected = true;
             }
         }
-        return false;
+        return this.typingImportDetected;
     }
 
     /**
@@ -61,7 +55,7 @@ export class TypingHintProvider {
         const type = this.typeContainer[typeName];
         if (type.category === TypeCategory.Collection) {
             this.providedTypes.push(type);
-            return this.toTypingString(type.name);
+            return this.toTypingString(type.name, this.fromTypingImport);
         }
         return null;
     }
@@ -78,7 +72,7 @@ export class TypingHintProvider {
             const type = this.typeContainer[searchResult.typeName];
             this.providedTypes.push(type);
 
-            const result: string[] = [ this.toTypingString(type.name)];
+            const result: string[] = [ this.toTypingString(type.name, this.fromTypingImport) ];
             let label = result[0];
 
             if (type.category === TypeCategory.Collection) {
@@ -97,7 +91,7 @@ export class TypingHintProvider {
                     if (this.typeContainer[elementType].name === PythonType.Dict) {
                         dictElementFound = true;
                     }
-                    label += this.toTypingString(elementType);
+                    label += this.toTypingString(elementType, this.fromTypingImport);
                     elementValue = elementValue.trim().substr(1);
                     elementType = TypeSearch.detectType(elementValue);
                     collectionCount++;
@@ -129,18 +123,33 @@ export class TypingHintProvider {
      * @returns An array of types.
      */
     public getRemainingHints(): string[] {
+        if (!this.typingImportDetected) {
+            return this.hintsForAllCollectionTypes();
+        }
         const result: string[] = [];
-
         for (const type of Object.values(this.typeContainer).filter(t => t.category === TypeCategory.Collection)) {
             if (!this.providedTypes.includes(type)) {
-                result.push(this.toTypingString(type.name));
+                result.push(this.toTypingString(type.name, this.fromTypingImport));
             }
         }
         return result;
     }
 
-    private toTypingString(typeName: string): string {
+    private hintsForAllCollectionTypes(): string[] {
+        const firstHalf: string[] = [];
+        const secondHalf: string[] = [];
+        for (const type of Object.values(this.typeContainer).filter(t => t.category === TypeCategory.Collection)) {
+            if (!this.providedTypes.includes(type)) {
+                const withoutPrefix = this.fromTypingImport || !this.typingImportDetected;
+                firstHalf.push(this.toTypingString(type.name, withoutPrefix));
+                secondHalf.push(this.toTypingString(type.name, !withoutPrefix));
+            }
+        }
+        return firstHalf.concat(secondHalf);
+    }
+
+    private toTypingString(typeName: string, withoutPrefix: boolean): string {
         const typingName = capitalized(typeName);
-        return this.fromTypingImport ? `${typingName}[` : `${this.typingPrefix}.${typingName}[`;
+        return withoutPrefix ? `${typingName}[` : `${this.typingPrefix}.${typingName}[`;
     }
 }
