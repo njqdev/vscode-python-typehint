@@ -1,6 +1,6 @@
 import * as assert from 'assert';
-import { TypeSearch } from "../../src/typeSearch";
-import { messageFor } from '../common';
+import { TypeSearch } from "../../../src/typeSearch";
+import { messageFor } from '../../common';
 
 suite('TypeSearch.findImport', () => {
 

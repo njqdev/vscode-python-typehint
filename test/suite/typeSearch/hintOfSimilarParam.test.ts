@@ -1,6 +1,6 @@
 import * as assert from 'assert';
-import { messageFor, TestCase } from "../common";
-import { TypeSearch } from "../../src/typeSearch";
+import { messageFor, TestCase } from "../../common";
+import { TypeSearch } from "../../../src/typeSearch";
 
 suite('TypeSearch.hintOfSimilarParam', () => {
 

@@ -1,9 +1,8 @@
 import * as assert from 'assert';
-import * as vsc from 'vscode';
-import { getDataTypeContainer, DataType, PythonType } from "../../src/python";
-import { TypingHintProvider } from "../../src/typingHintProvider";
-import { TypeHintSettings } from '../../src/settings';
-import { SetupError, varSearchResult, messageFor, TestCase } from '../common';
+import { getDataTypeContainer, DataType, PythonType } from "../../../src/python";
+import { TypingHintProvider } from "../../../src/typingHintProvider";
+import { TypeHintSettings } from '../../../src/settings';
+import { SetupError, varSearchResult, messageFor, TestCase } from '../../common';
 
 suite('TypingHintProvider', () => {
 

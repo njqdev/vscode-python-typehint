@@ -1,9 +1,9 @@
 import * as assert from 'assert';
 import * as vsc from 'vscode';
-import { paramHintTrigger, PythonType } from "../../src/python";
-import { CompletionProvider, ParamHintCompletionProvider } from "../../src/completionProvider";
-import { TypeHintSettings } from '../../src/settings';
-import { messageFor } from '../common';
+import { paramHintTrigger, PythonType } from "../../../src/python";
+import { CompletionProvider, ParamHintCompletionProvider } from "../../../src/completionProvider";
+import { TypeHintSettings } from '../../../src/settings';
+import { messageFor } from '../../common';
 
 suite('ParamHintCompletionProvider', () => {
     const provider = new ParamHintCompletionProvider(new TypeHintSettings());

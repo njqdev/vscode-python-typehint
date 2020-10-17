@@ -1,6 +1,6 @@
 import * as assert from 'assert';
-import { TypeSearch, EstimationSource } from "../../src/typeSearch";
-import { varSearchResult } from '../common';
+import { TypeSearch, EstimationSource } from "../../../src/typeSearch";
+import { varSearchResult } from '../../common';
 
 suite('TypeSearch.invalidTernaryOperator', () => {
 

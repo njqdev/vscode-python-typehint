@@ -1,7 +1,7 @@
 import * as assert from 'assert';
-import { getDataTypeContainer } from "../../src/python";
-import { TypeHintProvider } from "../../src/typeHintProvider";
-import { messageFor } from "../common";
+import { getDataTypeContainer } from "../../../src/python";
+import { TypeHintProvider } from "../../../src/typeHintProvider";
+import { messageFor } from "../../common";
 
 suite('TypeHintProvider', () => {
 
