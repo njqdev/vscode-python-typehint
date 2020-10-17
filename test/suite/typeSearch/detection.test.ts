@@ -9,23 +9,23 @@ suite('TypeSearch.detectType', () => {
         
         let src = "11";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected, messageFor(src, expected, actual));
 
         src = "-11";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
 
         src = "0b10";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
 
         src = "0o10";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
 
         src = "0x10";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
     });
     
     
@@ -34,19 +34,19 @@ suite('TypeSearch.detectType', () => {
 
         let src = "12.3";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected, messageFor(src, expected, actual));
 
         src = ".3";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
 
         src = "-.3";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
 
         src = "1 + 2 - 1 * 2 /  2.0";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
     });
 
     test("detects complex numbers", async () => {
@@ -54,7 +54,7 @@ suite('TypeSearch.detectType', () => {
 
         let src = "0+1.1-2*3/4j";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
 
     });
 
@@ -63,19 +63,19 @@ suite('TypeSearch.detectType', () => {
 
         let src = "'test'";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected, messageFor(src, expected, actual));
 
         src = "\"test\"'";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
 
         src = "('test')";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
 
         src = "'''t\nest''')";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
     });
 
     test("detects bools", async () => {
@@ -83,11 +83,11 @@ suite('TypeSearch.detectType', () => {
 
         let src = "True";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected, messageFor(src, expected, actual));
 
         src = "False";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
     });
     
     test("detects lists", async () => {
@@ -95,7 +95,7 @@ suite('TypeSearch.detectType', () => {
 
         let src = "[";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("detects dicts", async () => {
@@ -103,15 +103,15 @@ suite('TypeSearch.detectType', () => {
 
         let src = "{ 5: 'j'}";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected, messageFor(src, expected, actual));
 
         src = "{ (1,2): (3) }";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
 
         src = "{'':11}";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
     });
 
     test("detects tuples", async () => {
@@ -119,11 +119,11 @@ suite('TypeSearch.detectType', () => {
 
         let src = "('dont return str please', 'ok')";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected, messageFor(src, expected, actual));
 
         src = " ( '4' , '5' )";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
     });
 
     test("detects sets", async () => {
@@ -131,15 +131,15 @@ suite('TypeSearch.detectType', () => {
 
         let src = "{'dont return dict or string please'}";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
 
         src = "{1, 2}";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
 
         src = "{1 , 2}";
         actual = TypeSearch.detectType(src);
-        assert.equal(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
     });
     
     test("detects type() call", () => {
@@ -154,7 +154,7 @@ suite('TypeSearch.detectType', () => {
         ];
         for (const c of testCases) {
             let actual = TypeSearch.detectType(c.data);
-            assert.equal(actual, c.expected);
+            assert.strictEqual(actual, c.expected);
         }
     });
 
@@ -163,7 +163,7 @@ suite('TypeSearch.detectType', () => {
 
         let src = "        5";
         let actual = TypeSearch.detectType(src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 });
 
@@ -176,7 +176,7 @@ suite('TypeSearch.variableWithSameName', function() {
         let param = "var";
         let actual = await TypeSearch.variableWithSameName(param, src);
 
-        assert.equal(actual?.typeName, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual?.typeName, expected, messageFor(src, expected, actual));
     });
 
     test("detects variable types if initialized in the document", async () => {
@@ -187,12 +187,12 @@ suite('TypeSearch.variableWithSameName', function() {
         let src = `${line}\n\ndef main():\n\tx = 5`;
         let param = "var";
         let actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual?.typeName, expected, messageFor(src, expected, actual));
 
         // Variable with the same name initialized below
         src = `x = 5\n${line}`;
         actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual?.typeName, expected, messageFor(src, expected, actual));
     });
 
     test("considers value to be an object initializtion if title case", async () => {
@@ -200,12 +200,12 @@ suite('TypeSearch.variableWithSameName', function() {
         let src = `var = ${expected}(x)`;
         let param = "var";
         let actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual?.typeName, expected, messageFor(src, expected, actual));
 
         expected = "test.test.TestClass";
         src = `var = ${expected}(x)`;
         actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual?.typeName, expected, messageFor(src, expected, actual));
     });
 
     test("returns null for title case functions (if the function is defined in the document)", async () => {
@@ -215,7 +215,7 @@ suite('TypeSearch.variableWithSameName', function() {
         let src = `def Func(x):\n\tpass\n\n${line}`;
         let param = "var";
         let actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected);
     });
 
     test("detects function return values if type hinted", async () => {
@@ -223,11 +223,11 @@ suite('TypeSearch.variableWithSameName', function() {
         let src = "def test() -> int:\n\treturn 1\n\nvar = test()";
         let param = "var";
         let actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual?.typeName, expected, messageFor(src, expected, actual));
 
         src = "def test(self) -> int:\n\treturn 1\n\nvar = cls.test()";
         actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual?.typeName, expected, messageFor(src, expected, actual));
     });
     
     test("doesn't consider function calls to be variables", async () => {
@@ -235,7 +235,7 @@ suite('TypeSearch.variableWithSameName', function() {
         let src = `obj = call()`;
         let param = "var";
         let actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected);
     });
 
     test("ignores single-line comments", async () => {
@@ -244,6 +244,6 @@ suite('TypeSearch.variableWithSameName', function() {
         let src = `# obj = 5\n${line}`;
         let param = "var";
         let actual = await TypeSearch.variableWithSameName(param, src);
-        assert.equal(actual?.typeName, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected);
     });
 });

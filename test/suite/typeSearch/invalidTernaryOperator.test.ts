@@ -10,7 +10,7 @@ suite('TypeSearch.invalidTernaryOperator', () => {
         let typeName = "int";
         let src = "var = 1 if ok else 2.213";
         let actual = TypeSearch.invalidTernaryOperator(varSearchResult(typeName, src));
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("returns true for invalid nestled operator", () => {
@@ -18,7 +18,7 @@ suite('TypeSearch.invalidTernaryOperator', () => {
         let typeName = "int";
         let src = "var = 1 if ok else 2 if True else 'false'";
         let actual = TypeSearch.invalidTernaryOperator(varSearchResult(typeName, src));
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("returns false for valid single operator", () => {
@@ -27,7 +27,7 @@ suite('TypeSearch.invalidTernaryOperator', () => {
         let typeName = "int";
         let src = "var = 1 if ok else 2";
         let actual = TypeSearch.invalidTernaryOperator(varSearchResult(typeName, src));
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("returns false for valid nestled operator", () => {
@@ -35,7 +35,7 @@ suite('TypeSearch.invalidTernaryOperator', () => {
         let typeName = "int";
         let src = "var = 1 if ok else 2 if True else 9";
         let actual = TypeSearch.invalidTernaryOperator(varSearchResult(typeName, src));
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
 });

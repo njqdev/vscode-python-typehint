@@ -9,7 +9,7 @@ suite('TypeSearch.classWithSameName', () => {
         let expected = "Test";
         let src = `class ${expected}:`;
         let actual = TypeSearch.classWithSameName(value, src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("finds subclass", () => {
@@ -17,7 +17,7 @@ suite('TypeSearch.classWithSameName', () => {
         let expected = "Test";
         let src = `class ${expected}(Super):`;
         let actual = TypeSearch.classWithSameName(value, src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("handles tabs and spaces", () => {
@@ -25,10 +25,10 @@ suite('TypeSearch.classWithSameName', () => {
         let expected = "Test";
         let src = `\tclass  ${expected}:`;
         let actual = TypeSearch.classWithSameName(value, src);
-        assert.equal(actual, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected, messageFor(src, expected, actual));
 
         src = `    class  ${expected}:`;
         actual = TypeSearch.classWithSameName(value, src);
-        assert.equal(actual, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected, messageFor(src, expected, actual));
     });
 });

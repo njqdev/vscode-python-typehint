@@ -11,30 +11,30 @@ suite('ParamHintCompletionProvider', () => {
     test("provides items for first param", async () => {
         let param = "param_1:";
         let actual = await providerResult(provider, param);
-        assert.notEqual(actual, null);
+        assert.notStrictEqual(actual, null);
     });
 
     test("provides items for non-first param", async () => {
         let param = "first: str, paramName:";
         let actual = await providerResult(provider, param, "\n\nparamName = 12");
-        assert.notEqual(actual, null);
-        assert.equal(actual?.items[0].label.trim(), PythonType.Int);
+        assert.notStrictEqual(actual, null);
+        assert.strictEqual(actual?.items[0].label.trim(), PythonType.Int);
     });
 
     test("provides items for param on new line", async () => {
         let param = "\n    paramName:";
         let actual = await providerResult(provider, param);
-        assert.notEqual(actual, null);
+        assert.notStrictEqual(actual, null);
 
         param = "\n\tparamName:";
         actual = await providerResult(provider, param);
-        assert.notEqual(actual, null);
+        assert.notStrictEqual(actual, null);
     });
     
     test("provides items for param with legal non-ascii chars", async () => {
         let param = "a変な:";
         let actual = await providerResult(provider, param);
-        assert.notEqual(actual, null);
+        assert.notStrictEqual(actual, null);
     });
 
     test("provides items for nestled function", async () => {
@@ -43,7 +43,7 @@ suite('ParamHintCompletionProvider', () => {
     def nestled(multiple_lines,
                 paramName:`;
         let actual = await providerResult(provider, data);
-        assert.notEqual(actual, null);
+        assert.notStrictEqual(actual, null);
     });
 
     test("provides items for async function", async () => {
@@ -51,13 +51,13 @@ suite('ParamHintCompletionProvider', () => {
         let pos = new vsc.Position(0, data.length);
         let expected = null;
         let actual = await provideCompletionItems(provider, data, pos);
-        assert.notEqual(actual, null, messageFor(data, expected, actual));
+        assert.notStrictEqual(actual, null, messageFor(data, expected, actual));
 
         let line2 = "        test:";
         data = "async def func(\n" + line2;
         pos = new vsc.Position(1, line2.length);
         actual = await provideCompletionItems(provider, data, pos);
-        assert.notEqual(actual, null, messageFor(data, expected, actual));
+        assert.notStrictEqual(actual, null, messageFor(data, expected, actual));
     });
     
     test("provides default items if nothing is detected", async () => {
@@ -65,9 +65,9 @@ suite('ParamHintCompletionProvider', () => {
         let expected = typeHints().concat(typingHints());
         let result = await providerResult(provider, param);
         
-        assert.notEqual(result, null);
+        assert.notStrictEqual(result, null);
         const actual: string[] | undefined = result?.items.map(item => item.label.trim());
-        assert.deepEqual(actual, expected);
+        assert.deepStrictEqual(actual, expected);
     });
 
     test("provides type estimations + default items", async () => {
@@ -76,36 +76,36 @@ suite('ParamHintCompletionProvider', () => {
 
         let result = await providerResult(provider, param, "\n\nparam = Class()");
 
-        assert.notEqual(result, null);
+        assert.notStrictEqual(result, null);
         const actual: string[] | undefined = result?.items.map(item => item.label.trim());
-        assert.deepEqual(actual, expected);
+        assert.deepStrictEqual(actual, expected);
     });
     
     test("does not provide items unless a function def is detected", async () => {
         let text = " :";
         let pos = new vsc.Position(0, text.length);
         let actual = await provideCompletionItems(provider, text, pos);
-        assert.equal(actual, null);
+        assert.strictEqual(actual, null);
     });
 
     test("does not provide items for ':' without a param (within function brackets)", async () => {
         let actual = await providerResult(provider, "param, :");
-        assert.equal(actual, null);
+        assert.strictEqual(actual, null);
     });
 
     test("does not provide items for ':' under a function def", async () => {
         let data = "):\n    d = ', not_a_param:";
         let expected = null;
         let actual = await providerResult(provider, data);
-        assert.equal(actual, expected, messageFor(data, expected, actual));
+        assert.strictEqual(actual, expected, messageFor(data, expected, actual));
         
         data = "):\n    :";
         actual = await providerResult(provider, data);
-        assert.equal(actual, expected, messageFor(data, expected, actual));
+        assert.strictEqual(actual, expected, messageFor(data, expected, actual));
 
         data = "):\n d = { key:";
         actual = await providerResult(provider, data);
-        assert.equal(actual, null, messageFor(data, expected, actual));
+        assert.strictEqual(actual, null, messageFor(data, expected, actual));
 
         data = `self,
         s: str,
@@ -113,7 +113,7 @@ suite('ParamHintCompletionProvider', () => {
         i: int):
     v = ', not_a_param:`;
         actual = await providerResult(provider, data);
-        assert.equal(actual, null, messageFor(data, expected, actual));
+        assert.strictEqual(actual, null, messageFor(data, expected, actual));
 
         data = `self,
         s: str,
@@ -121,7 +121,7 @@ suite('ParamHintCompletionProvider', () => {
         i: int) -> int:
     v = ', not_a_param:`;
         actual = await providerResult(provider, data);
-        assert.equal(actual, null, messageFor(data, expected, actual));
+        assert.strictEqual(actual, null, messageFor(data, expected, actual));
 
         data = `self,
         s: str,
@@ -129,18 +129,18 @@ suite('ParamHintCompletionProvider', () => {
         i: int) -> 変な:
     v = ', not_a_param:`;
         actual = await providerResult(provider, data);
-        assert.equal(actual, null, messageFor(data, expected, actual));
+        assert.strictEqual(actual, null, messageFor(data, expected, actual));
     });
 
     test("does not provide items for end of function definition", async () => {
         let actual = await providerResult(provider, "):");
-        assert.equal(actual, null);
+        assert.strictEqual(actual, null);
     });
 
     test("does not include * in parameter name", async () => {
         let param = "*paramName:";
         let actual = await providerResult(provider, param, "\n\nparamName = 12");
-        assert.equal(actual?.items[0].label.trim(), PythonType.Int);
+        assert.strictEqual(actual?.items[0].label.trim(), PythonType.Int);
     });
 
 });

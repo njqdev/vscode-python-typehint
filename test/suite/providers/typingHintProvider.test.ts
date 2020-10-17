@@ -21,17 +21,17 @@ suite('TypingHintProvider', () => {
 
         test("returns true for 'import typing'", async () => {
             const actual = await provider.detectTypingImport(importTyping);
-            assert.equal(actual, true);
+            assert.strictEqual(actual, true);
         });
 
         test("returns true for 'import typing as x'", async () => {
             const actual = await provider.detectTypingImport(importTypingAsX);
-            assert.equal(actual, true);
+            assert.strictEqual(actual, true);
         });
 
         test("returns true for 'from typing import x'", async () => {
             const actual = await provider.detectTypingImport(fromTypingImport);
-            assert.equal(actual, true);
+            assert.strictEqual(actual, true);
         });
     });
 
@@ -60,7 +60,7 @@ suite('TypingHintProvider', () => {
 
         function getHintTest(provider: TypingHintProvider, expected: string) {
             const actual = provider.getHint(PythonType.List);
-            assert.equal(actual, expected);
+            assert.strictEqual(actual, expected);
         }
     });
 
@@ -120,7 +120,7 @@ suite('TypingHintProvider', () => {
         
         function getHintsTest(provider: TypingHintProvider, testCase: TestCase, type: PythonType) {
             const actual = provider.getHints(varSearchResult(type, testCase.data));
-            assert.deepEqual(actual, testCase.expected, messageFor(testCase.data, testCase.expected, actual));
+            assert.deepStrictEqual(actual, testCase.expected, messageFor(testCase.data, testCase.expected, actual));
         }
     });
 
@@ -136,7 +136,7 @@ suite('TypingHintProvider', () => {
             await provider.detectTypingImport("");
             const expected = typingTypes(false).concat(typingTypes(true));
             const actual = provider.getRemainingHints();
-            assert.deepEqual(actual, expected);
+            assert.deepStrictEqual(actual, expected);
         });
 
         test("returns hints without prefix first, for from typing import", async () => {
@@ -162,7 +162,7 @@ suite('TypingHintProvider', () => {
         
         function getRemainingHintsTest(provider: TypingHintProvider, expected: string) {
             const actual = provider.getRemainingHints();
-            assert.deepEqual(actual, expected);
+            assert.deepStrictEqual(actual, expected);
         }
     });
 

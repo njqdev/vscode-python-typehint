@@ -9,7 +9,7 @@ suite('TypeSearch.hintOfSimilarParam', () => {
         const param = "test";
         let src = `def func(${param}: str):\ndef test(${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("finds hint of param with preceding parameters", () => {
@@ -18,7 +18,7 @@ suite('TypeSearch.hintOfSimilarParam', () => {
 
         let src = `def func(self, p1: int,${param}: str):\ndef test(${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
     
     test("finds hint of param with trailing parameters", () => {
@@ -27,7 +27,7 @@ suite('TypeSearch.hintOfSimilarParam', () => {
 
         let src = `def func(self, ${param}: str,new: int):\ndef test(${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("handles line breaks in function definition", () => {
@@ -36,7 +36,7 @@ suite('TypeSearch.hintOfSimilarParam', () => {
 
         let src = `def func(\n\t${param}: str,new: int):\ndef test(${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("excludes default values", () => {
@@ -45,7 +45,7 @@ suite('TypeSearch.hintOfSimilarParam', () => {
 
         let src = `def func(${param}: str='exclude',new: int):\ndef test(${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("finds non-ascii hint", () => {
@@ -53,7 +53,7 @@ suite('TypeSearch.hintOfSimilarParam', () => {
         const param = "test";
         let src = `def func(${param}: 蟒蛇):\ndef test(${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("matches non-ascii function names", () => {
@@ -61,7 +61,7 @@ suite('TypeSearch.hintOfSimilarParam', () => {
         const param = "test";
         let src = `def 蟒蛇(${param}: str):\ndef test(${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("doesn't match param name within other text", () => {
@@ -70,7 +70,7 @@ suite('TypeSearch.hintOfSimilarParam', () => {
 
         let src = `def func(text${param}: str,new: int):\ndef test(${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("doesn't provide items for ':' followed by ':'", () => {
@@ -80,7 +80,7 @@ suite('TypeSearch.hintOfSimilarParam', () => {
 
         let src = `def func(${param}::):\ndef test(${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("doesn't match comments", () => {
@@ -88,10 +88,10 @@ suite('TypeSearch.hintOfSimilarParam', () => {
         const param = "test";
         let src = `# def func(${param}: str):\ndef test(${param}:`;
         let actual = TypeSearch.hintOfSimilarParam(param, src);
-        assert.equal(actual, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected, messageFor(src, expected, actual));
 
         src = `def func(\n\t# {${param}: 123}`;
-        assert.equal(actual, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected, messageFor(src, expected, actual));
     });
     
 });

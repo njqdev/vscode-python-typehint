@@ -9,7 +9,7 @@ suite('TypeSearch.findImport', () => {
         let expected = value;
         let src = "import module_x";
         let actual = TypeSearch.findImport(value, src, false);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("finds import x.y", () => {
@@ -17,7 +17,7 @@ suite('TypeSearch.findImport', () => {
         let expected = value;
         let src = "import package.x.y";
         let actual = TypeSearch.findImport(value, src, false);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("finds import x.y.(...)z", () => {
@@ -25,7 +25,7 @@ suite('TypeSearch.findImport', () => {
         let expected = value;
         let src = "import package.x.y.z.a";
         let actual = TypeSearch.findImport(value, src, false);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("finds from x import", () => {
@@ -33,7 +33,7 @@ suite('TypeSearch.findImport', () => {
         let expected = value;
         let src = "import something\nfrom something import " + expected;
         let actual = TypeSearch.findImport(value, src, false);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("finds from x import y as z", () => {
@@ -41,7 +41,7 @@ suite('TypeSearch.findImport', () => {
         let expected = value;
         let src = "from pkg import y as " + expected;
         let actual = TypeSearch.findImport(value, src, true);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     
@@ -50,12 +50,12 @@ suite('TypeSearch.findImport', () => {
         let expected = "Type";
         let src = "from module import " + expected;
         let actual = TypeSearch.findImport(value, src, false);
-        assert.equal(actual, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected, messageFor(src, expected, actual));
 
         value = "package.x.y_test.Type";
         src = "from package.x.y_test import " + expected;
         actual = TypeSearch.findImport(value, src, false);
-        assert.equal(actual, expected, messageFor(src, expected, actual));
+        assert.strictEqual(actual, expected, messageFor(src, expected, actual));
     });
 
     test("value == x.Type --> returns x.Type for 'from y import x'", () => {
@@ -63,7 +63,7 @@ suite('TypeSearch.findImport', () => {
         let expected = value;
         let src = "from y import x";
         let actual = TypeSearch.findImport(value, src, false);
-        assert.equal(actual, expected); 
+        assert.strictEqual(actual, expected); 
     });
 
     test("ignores extra spaces and tabs", () => {
@@ -71,7 +71,7 @@ suite('TypeSearch.findImport', () => {
         let expected = value;
         let src = "def x():\n\t    from    pkg     import " + expected;
         let actual = TypeSearch.findImport(value, src, false);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
 });
