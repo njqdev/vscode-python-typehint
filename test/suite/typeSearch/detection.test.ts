@@ -141,16 +141,37 @@ suite('TypeSearch.detectType', () => {
         actual = TypeSearch.detectType(src);
         assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
     });
+
+    test("detects bytes", async () => {
+        const expected = "bytes";
+
+        let src = "b'dont return string please'";
+        let actual = TypeSearch.detectType(src);
+        assert.strictEqual(actual, expected);
+
+        src = 'b"dont return string please"';
+        actual = TypeSearch.detectType(src);
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+
+        src = "b'''hi'''";
+        actual = TypeSearch.detectType(src);
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+
+        src = 'b"""hi"""';
+        actual = TypeSearch.detectType(src);
+        assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
+    });
     
     test("detects type() call", () => {
         const testCases: TestCase[] = [
-            { data: "int('2')", expected: "int"},
-            { data: "bool(true)", expected: "bool"},
-            { data: "list(foo)", expected: "list"},
-            { data: "dict(foo)", expected: "dict"},
-            { data: "tuple(foo)", expected: "tuple"},
-            { data: "str(1)", expected: "str"},
-            { data: "set([1])", expected: "set"}
+            { data: "int('2')", expected: "int" },
+            { data: "bool('true')", expected: "bool" },
+            { data: "list(foo)", expected: "list" },
+            { data: "dict(foo)", expected: "dict" },
+            { data: "tuple(foo)", expected: "tuple" },
+            { data: "str(1)", expected: "str" },
+            { data: "set([1])", expected: "set" },
+            { data: "bytes('hi', encoding='utf-8')", expected: "bytes" }
         ];
         for (const c of testCases) {
             let actual = TypeSearch.detectType(c.data);

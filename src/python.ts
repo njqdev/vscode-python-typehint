@@ -27,6 +27,7 @@ export interface DataTypeContainer {
 export const getDataTypeContainer = (): DataTypeContainer => {
     return {
         bool: new DataType(PythonType.Bool, typeCategories.bool),
+        bytes: new DataType(PythonType.Bytes, typeCategories.bytes),
         complex: new DataType(PythonType.Complex, typeCategories.complex),
         dict: new DataType(PythonType.Dict, typeCategories.dict),
         float: new DataType(PythonType.Float, typeCategories.float),
@@ -44,6 +45,7 @@ export const getDataTypeContainer = (): DataTypeContainer => {
  */
 export enum PythonType {
     Bool = "bool",
+    Bytes = "bytes",
     Complex = "complex",
     Dict = "dict",
     Float = "float",
@@ -69,6 +71,7 @@ export enum TypeCategory {
  */
 const typeCategories: { [key: string]: TypeCategory } = {
     bool: TypeCategory.Basic,
+    bytes: TypeCategory.Basic,
     complex: TypeCategory.Basic,
     dict: TypeCategory.Collection,
     float: TypeCategory.Basic,

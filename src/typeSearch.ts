@@ -130,6 +130,7 @@ export class TypeSearch {
             [ PythonType.Set, `${PythonType.Set}\\(`, `^ *{( *"[^"]*" *[},]+| *'[^']*' *[},]+|[^:]+[}])`],
             [ PythonType.Dict, `${PythonType.Dict}\\(`, "^ *{"],
             [ PythonType.String, `${PythonType.String}\\(`, `^ *(['"]{2}|(\\( *)?"[^"]*"|(\\( *)?'[^']*')`],
+            [ PythonType.Bytes, `${PythonType.Bytes}\\(`, `^ *b['"]`],
             [ PythonType.Int, `${PythonType.Int}\\(`, `^ *[-(]*[0-9]`],
             [ PythonType.Object, `${PythonType.Object}\\(` ]
         ];
