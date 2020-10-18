@@ -2,7 +2,7 @@
 
 ## [1.4.0] - 2020-10-18
 
-* Added type hinting for bytes
+* Added type hints for bytes
 * Changed the default workspace search limit to 10
 
 ## [1.3.0] - 2020-08-22
