@@ -35,7 +35,7 @@ export class TypeHintSettings {
         if (wsEnable !== undefined) {
             this._workspaceSearchEnabled = wsEnable;
         }
-        if (searchLimit || searchLimit === 0) {
+        if (searchLimit !== undefined) {
             this._workspaceSearchLimit = Number.isInteger(searchLimit) ? searchLimit : Math.round(searchLimit);
         }
     }

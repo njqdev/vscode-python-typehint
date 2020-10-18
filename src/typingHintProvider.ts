@@ -7,6 +7,7 @@ import { VariableSearchResult, TypeSearch } from "./typeSearch";
  */
 export class TypingHintProvider {
 
+    private collectionTypes: DataType[];
     private typeContainer: DataTypeContainer;
     private typingImportDetected: boolean = false;
     private fromTypingImport: boolean = false;
@@ -20,6 +21,7 @@ export class TypingHintProvider {
      */
     constructor(typeContainer: DataTypeContainer) {
         this.typeContainer = typeContainer;
+        this.collectionTypes = Object.values(typeContainer).filter(t => t.category === TypeCategory.Collection);
     }
 
     /**
@@ -28,8 +30,7 @@ export class TypingHintProvider {
      * @param docText The document text to search.
      * @returns True if typing is imported.
      */
-    public async detectTypingImport(docText: string): Promise<boolean> {
-
+    public detectTypingImport(docText: string): boolean {
         if (/^[ \t]*from typing import +([A-Z][a-zA-Z0-9 ,]+)/m.exec(docText)) {
             this.fromTypingImport = true;
             this.typingImportDetected = true;
@@ -127,7 +128,7 @@ export class TypingHintProvider {
             return this.hintsForAllCollectionTypes();
         }
         const result: string[] = [];
-        for (const type of Object.values(this.typeContainer).filter(t => t.category === TypeCategory.Collection)) {
+        for (const type of this.collectionTypes) {
             if (!this.providedTypes.includes(type)) {
                 result.push(this.toTypingString(type.name, this.fromTypingImport));
             }
@@ -138,7 +139,7 @@ export class TypingHintProvider {
     private hintsForAllCollectionTypes(): string[] {
         const firstHalf: string[] = [];
         const secondHalf: string[] = [];
-        for (const type of Object.values(this.typeContainer).filter(t => t.category === TypeCategory.Collection)) {
+        for (const type of this.collectionTypes) {
             if (!this.providedTypes.includes(type)) {
                 const withoutPrefix = this.fromTypingImport || !this.typingImportDetected;
                 firstHalf.push(this.toTypingString(type.name, withoutPrefix));

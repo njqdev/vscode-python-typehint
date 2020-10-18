@@ -46,24 +46,24 @@ export class TypeSearch {
      * @param src The source code to search.
      */
     public static async variableWithSameName(param: string, src: string): Promise<VariableSearchResult | null> {
-        let match = this.variableSearchRegExp(param).exec(src);
-        if (!match) {
+        let variableMatch = this.variableSearchRegExp(param).exec(src);
+        if (!variableMatch) {
             return null;
         }
-        const valueAssignment = match[1];
+        const valueAssignment = variableMatch[1];
 
         let typeName = this.detectType(valueAssignment);
         if (typeName) {
             return new VariableSearchResult(typeName, EstimationSource.Value, valueAssignment);
         }
         
-        match = /^ *([^(\s#"']+)\(?/.exec(valueAssignment);
-        if (!match) {
+        variableMatch = /^ *([^(\s#"']+)\(?/.exec(valueAssignment);
+        if (!variableMatch) {
             return null;
         }
 
-        if (match[0].endsWith("(")) {
-            let value = match[1];
+        if (variableMatch[0].endsWith("(")) {
+            let value = variableMatch[1];
             if (this.classWithSameName(value, src)) {
                 return new VariableSearchResult(value, EstimationSource.ClassDefinition, valueAssignment);
             }
@@ -79,10 +79,10 @@ export class TypeSearch {
         }
 
         // Searching the import source document is not supported
-        if (!this.isImported(match[1], src.substr(match.index - match.length))) {
-            match = this.variableSearchRegExp(match[1]).exec(src);
-            if (match) {
-                const otherType = this.detectType(match[1]);
+        if (!this.isImported(variableMatch[1], src.substr(variableMatch.index - variableMatch.length))) {
+            variableMatch = this.variableSearchRegExp(variableMatch[1]).exec(src);
+            if (variableMatch) {
+                const otherType = this.detectType(variableMatch[1]);
                 return otherType 
                     ? new VariableSearchResult(otherType, EstimationSource.ValueOfOtherVariable, valueAssignment)
                     : null;

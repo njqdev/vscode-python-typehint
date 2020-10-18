@@ -1,5 +1,5 @@
 import { TextDocument } from "vscode";
-import { PythonType as PythonType, DataTypeContainer, getDataTypeContainer } from "./python";
+import { PythonType as PythonType, DataTypeContainer } from "./python";
 import { TypeSearch, VariableSearchResult } from "./typeSearch";
 import { TypingHintProvider } from "./typingHintProvider";
 import { TypeHintSettings } from "./settings";
@@ -12,25 +12,18 @@ export class TypeHintProvider {
     private _typingHintProvider: TypingHintProvider;
 
     private likelyTypes: PythonType[] = [
-        PythonType.String,
         PythonType.List, 
-        PythonType.Dict, 
+        PythonType.Dict,
+        PythonType.String,
         PythonType.Bool, 
         PythonType.Int, 
         PythonType.Tuple, 
         PythonType.Float
     ];
     private _providedTypeHints: string[] = [];
-    private _typeContainer: DataTypeContainer;
-    private _typingImported = false;
 
     constructor(typeContainer: DataTypeContainer) {
-        this._typeContainer = typeContainer;
         this._typingHintProvider = new TypingHintProvider(typeContainer);
-    }
-
-    public get typingImported() {
-        return this._typingImported;
     }
 
     /**
@@ -43,14 +36,13 @@ export class TypeHintProvider {
     public async estimateTypeHints(param: string, documentText: string): Promise<string[]> {
         const typeHints: string[] = [];
 
-        const typingSearch = this._typingHintProvider.detectTypingImport(documentText);
         const variableSearch = TypeSearch.variableWithSameName(param, documentText);
 
+        const isTypingImported = this._typingHintProvider.detectTypingImport(documentText);
         let typeName = this.getTypeParamEndsWith(param, "_");
-        this._typingImported = await typingSearch;
         if (typeName) {
             this.add(typeName, typeHints);
-            this.tryAddTypingHint(typeName, typeHints);
+            this.tryAddTypingHint(typeName, typeHints, isTypingImported);
         }
 
         const typesFound = typeHints.length > 0 
@@ -64,15 +56,15 @@ export class TypeHintProvider {
 
         if (searchResult !== null && !TypeSearch.invalidTernaryOperator(searchResult)) {
             this.add(searchResult.typeName, typeHints);
-            this.tryAddTypingHints(searchResult, typeHints);
-            this.tryAdd(this.typeGuessFor(param, typeHints), typeHints);
+            this.tryAddTypingHints(searchResult, typeHints, isTypingImported);
+            this.tryAdd(this.typeGuessFor(param), typeHints);
         } else {
             typeName = this.getTypeParamEndsWith(param, "");
             if (typeName) {
                 this.add(typeName, typeHints);
-                this.tryAddTypingHint(typeName, typeHints);
+                this.tryAddTypingHint(typeName, typeHints, isTypingImported);
             } else {
-                this.tryAdd(this.typeGuessFor(param, typeHints), typeHints);
+                this.tryAdd(this.typeGuessFor(param), typeHints);
             }
         }
         return typeHints;
@@ -82,15 +74,7 @@ export class TypeHintProvider {
      * Returns hints for types that have not been provided yet.
      */
     public remainingTypeHints(): PythonType[] {
-        const result: PythonType[] = [];
-
-        for (const type of Object.values(this._typeContainer)) {
-            if (this.hintNotProvided(type.name)) {
-                result.push(type.name);
-            }
-        }
-
-        return result;
+        return Object.values(PythonType).filter(type => this.hintNotProvided(type));
     }
 
     /**
@@ -107,7 +91,7 @@ export class TypeHintProvider {
     /**
      * If the param ends with a type name, the type is returned.
      * @param param The parameter name.
-     * @param prefix A prefix before the typename. For example, a param named x{prefix}list will return 'list'.
+     * @param prefix A prefix before the typename. For example, a param named {prefix}list will return 'list'.
      */
     private getTypeParamEndsWith(param: string, prefix: string): PythonType | null {
         const paramUpper = param.toUpperCase();
@@ -120,7 +104,7 @@ export class TypeHintProvider {
         return null;
     }
 
-    private typeGuessFor(param: string, typeHints: string[]): string | null {
+    private typeGuessFor(param: string): string | null {
         const typeGuesses: { [key: string]: string } = {
             "string": PythonType.String,
             "text": PythonType.String,
@@ -133,7 +117,6 @@ export class TypeHintProvider {
             "num": PythonType.Int
         };
         if (param in typeGuesses) {
-            this.add(typeGuesses[param], typeHints);
             return typeGuesses[param];
         }
         return null;
@@ -156,8 +139,8 @@ export class TypeHintProvider {
         return false;
     }
     
-    private tryAddTypingHints(searchResult: VariableSearchResult | null, typeHints: string[]) {
-        if (this._typingImported) {
+    private tryAddTypingHints(searchResult: VariableSearchResult | null, typeHints: string[], typingImported: boolean) {
+        if (typingImported) {
             const hints: string[] | null = this._typingHintProvider.getHints(searchResult);
             if (hints) {
                 for (const hint of hints) {
@@ -167,8 +150,8 @@ export class TypeHintProvider {
         }
     }
 
-    private tryAddTypingHint(typeName: string, typeHints: string[]) {
-        if (this._typingImported) {
+    private tryAddTypingHint(typeName: string, typeHints: string[], typingImported: boolean) {
+        if (typingImported) {
             const typingHint = this._typingHintProvider.getHint(typeName);
             if (typingHint) {
                 this.add(typingHint, typeHints);
