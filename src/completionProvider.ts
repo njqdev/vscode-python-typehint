@@ -84,8 +84,8 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
             const items: CompletionItem[] = [];
             const line = doc.lineAt(pos);
             const precedingText = line.text.substring(0, pos.character - 1).trim();
-
-            if (this.shouldProvideItems(precedingText, pos, doc)) {
+            
+            if (this.shouldProvideItems(precedingText, pos, doc) && !token.isCancellationRequested) {
                 const param = this.getParam(precedingText);
                 const documentText = doc.getText();
                 const typeContainer = getDataTypeContainer();
@@ -93,7 +93,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
                 const wsSearcher = new WorkspaceSearcher(doc.uri, this.settings, typeContainer);
                 let estimations: string[] = [];
 
-                if (param) {
+                if (param && !token.isCancellationRequested) {
                     const workspaceHintSearch = this.settings.workspaceSearchEnabled
                         ? this.workspaceHintSearch(param, wsSearcher, documentText)
                         : null;
@@ -106,6 +106,10 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
                     } catch {
                     }
 
+                    if (token.isCancellationRequested) {
+                        wsSearcher.cancel();
+                        return Promise.resolve(null); 
+                    }
                     this.pushHintsToItems(provider.remainingTypeHints(), items, estimations.length === 0);
                     this.itemSortPrefix++;
                     this.pushHintsToItems(provider.remainingTypingHints(), items, false);

@@ -58,7 +58,9 @@ export class WorkspaceSearcher {
      * Stops all searches.
      */
     public cancel() {
-        this.tokenSource.cancel();
-        this.search = false;
+        if (this.search) {
+            this.search = false;
+            this.tokenSource.cancel();
+        }
     }
 }
