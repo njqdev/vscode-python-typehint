@@ -8,18 +8,18 @@ Provides type hint auto-completion for Python, with completion items for built-i
 
 ## Features
 
+* Provides type hint completion items for built-in types, estimated types and the typing module.
+
 * Estimates the correct type to provide as a completion item.
 
-* Searches Python files in the workspace for type estimation purposes.
-
-* Can provide completion items for the typing module if it is imported.
+* Can search Python files in the workspace for type estimation purposes.
 
 ## Settings
 
 | Name | Description | Default
 |---|---|---|
 | workspace.searchEnabled | _(boolean)_ If enabled, other files in the workspace are searched when estimating types for a parameter. Disabling this will increase performance, but may reduce estimation accuracy. | true
-| workspace.searchLimit | _(number)_ The maximum number of files searched in a workspace search. | 20
+| workspace.searchLimit | _(number)_ The maximum number of files searched in a workspace search. Has no effect if workspace searching is disabled. | 10
 
 ## Known Issues
 

@@ -6,7 +6,7 @@ import { workspace, Event, EventEmitter } from "vscode";
 export class TypeHintSettings {
 
     private _workspaceSearchEnabled = true;
-    private _workspaceSearchLimit = 20;
+    private _workspaceSearchLimit = 10;
 
     constructor() {
         workspace.onDidChangeConfiguration(() => {
