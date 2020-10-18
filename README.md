@@ -23,7 +23,7 @@ Provides type hint auto-completion for Python, with completion items for built-i
 
 ## Known Issues
 
-* Invalid code in the same or other workspace Python files can result in incorrect type predictions.
+* If workspace searching is enabled, a VSCode event (onDidOpen) is triggered when a file is searched. This causes other extensions that are listening to the event to analyse the same files, which can add the problems of those files to the Problems window. The only way to prevent this, for now, is by disabling the workspace search setting.
 
 * The difference between function and class constructor calls when detecting types is determined by the first letter being upper case (unless the class or function is defined in the currently edited document).
 

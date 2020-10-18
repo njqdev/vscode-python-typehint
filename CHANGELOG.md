@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.4.1] - 2020-10-18
+
+* Added a known issue to the readme.
+
 ## [1.4.0] - 2020-10-18
 
 * Added type hints for bytes
