@@ -18,7 +18,7 @@ suite('ParamHintCompletionProvider', () => {
         let param = "first: str, paramName:";
         let actual = await providerResult(provider, param, "\n\nparamName = 12");
         assert.notStrictEqual(actual, null);
-        assert.strictEqual(actual?.items[0].label.trim(), PythonType.Int);
+        assert.strictEqual(actual?.items[0].label, ` ${PythonType.Int}`);
     });
 
     test("provides items for param on new line", async () => {
@@ -66,7 +66,7 @@ suite('ParamHintCompletionProvider', () => {
         let result = await providerResult(provider, param);
         
         assert.notStrictEqual(result, null);
-        const actual: string[] | undefined = result?.items.map(item => item.label.trim());
+        const actual: string[] | undefined = result?.items.map(item => item.label.toString().trim());
         assert.deepStrictEqual(actual, expected);
     });
 
@@ -77,7 +77,7 @@ suite('ParamHintCompletionProvider', () => {
         let result = await providerResult(provider, param, "\n\nparam = Class()");
 
         assert.notStrictEqual(result, null);
-        const actual: string[] | undefined = result?.items.map(item => item.label.trim());
+        const actual: string[] | undefined = result?.items.map(item => item.label.toString().trim());
         assert.deepStrictEqual(actual, expected);
     });
     
@@ -140,7 +140,7 @@ suite('ParamHintCompletionProvider', () => {
     test("does not include * in parameter name", async () => {
         let param = "*paramName:";
         let actual = await providerResult(provider, param, "\n\nparamName = 12");
-        assert.strictEqual(actual?.items[0].label.trim(), PythonType.Int);
+        assert.strictEqual(actual?.items[0].label, ` ${PythonType.Int}`);
     });
 
 });

@@ -54,7 +54,7 @@ export abstract class CompletionProvider {
         return " " + typeHint;
     }
 
-    abstract async provideCompletionItems(
+    abstract provideCompletionItems(
         doc: TextDocument, 
         pos: Position,
         token: CancellationToken,
