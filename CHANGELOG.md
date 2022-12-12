@@ -1,7 +1,7 @@
 # Change Log
 
 
-## [1.4.2] - 2022-12-12
+## [1.5.1] - 2022-12-12
 
 * Prevents the extension from being activated for non-Python languages.
 
