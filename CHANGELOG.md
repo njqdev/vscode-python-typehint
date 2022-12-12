@@ -1,5 +1,12 @@
 # Change Log
 
+
+## [1.4.2] - 2022-12-12
+
+* Prevents the extension from being activated for non-Python languages.
+
+* Fixes type hints being provided for some function definitions ending with typing module hints, i.e. '-> Dict[str, str]:'.
+
 ## [1.4.1] - 2020-10-18
 
 * Added a known issue to the readme.
