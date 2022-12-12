@@ -63,7 +63,7 @@
 		"compile": "webpack --mode none",
 		"watch": "webpack --mode none --watch",
 		"test-compile": "tsc -p ./ && npm run compile",
-		"test": "node ./out/test/runTest.js"
+		"test": "npm run test-compile && node ./out/test/runTest.js"
 	},
 	"devDependencies": {
 		"@types/glob": "^8.0.0",
