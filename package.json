@@ -62,9 +62,8 @@
 		"vscode:prepublish": "webpack --mode production",
 		"compile": "webpack --mode none",
 		"watch": "webpack --mode none --watch",
-		"just-test": "node node_modules/vscode/bin/test",
 		"test-compile": "tsc -p ./ && npm run compile",
-		"test": "npm run test-compile && node node_modules/vscode/bin/test"
+		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
 		"@types/glob": "^8.0.0",
