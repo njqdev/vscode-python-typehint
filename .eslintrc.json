@@ -2,18 +2,31 @@
     "root": true,
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "ecmaVersion": 6,
+        "ecmaVersion": 12,
         "sourceType": "module"
     },
     "plugins": [
         "@typescript-eslint"
     ],
     "rules": {
-        "@typescript-eslint/class-name-casing": "warn",
+        "@typescript-eslint/naming-convention": "warn",
         "@typescript-eslint/semi": "warn",
         "curly": "warn",
         "eqeqeq": "warn",
         "no-throw-literal": "warn",
         "semi": "off"
-    }
+    },
+    "overrides": [{
+        "files": ["**/*.ts"],
+        "rules": {
+          "@typescript-eslint/naming-convention": ["warn", {
+            "selector": "enum",
+            "format": null,
+            "custom": {
+              "regex": "^[A-Z]\\w*$",
+              "match": true
+            }
+          }]
+        }
+      }]
 }
