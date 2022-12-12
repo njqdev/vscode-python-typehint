@@ -1,7 +1,7 @@
 {
 	"name": "vscode-python-typehint",
 	"displayName": "Python Type Hint",
-	"version": "1.4.2",
+	"version": "1.5.0",
 	"publisher": "njqdev",
 	"description": "Type hint completion for Python.",
 	"icon": "images/icon.png",
