@@ -24,7 +24,7 @@
 		"vscode": "^1.73.1"
 	},
 	"activationEvents": [
-		"*"
+		"onLanguage:python"
 	],
 	"main": "./dist/extension",
 	"contributes": {
