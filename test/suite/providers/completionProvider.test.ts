@@ -137,6 +137,16 @@ suite('ParamHintCompletionProvider', () => {
         assert.strictEqual(actual, null);
     });
 
+    test("does not provide items for end of function definition with typing hint", async () => {
+        let actual = await providerResult(provider, "def test(n: int) -> List[str]:");
+        assert.strictEqual(actual, null);
+    });
+
+    test("does not provide items for end of function definition with typing Dict hint", async () => {
+        let actual = await providerResult(provider, "def test(n: int) -> Dict[str, str]:");
+        assert.strictEqual(actual, null);
+    });
+
     test("does not include * in parameter name", async () => {
         let param = "*paramName:";
         let actual = await providerResult(provider, param, "\n\nparamName = 12");

@@ -141,7 +141,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
     private getParam(precedingText: string): string | null {
         const split = precedingText.split(/[,(*]/);
         let param = split.length > 1 ? split[split.length - 1].trim() : precedingText;
-        return !param || /[!:?/\\{}.+/=)'";@&£%¤|<>$^~¨ -]/.test(param) ? null : param;
+        return !param || /[!:\]\[?/\\{}.+/=)'";@&£%¤|<>$^~¨ -]/.test(param) ? null : param;
     }
     
     private pushEstimationsToItems(typeHints: string[], items: CompletionItem[]) {
