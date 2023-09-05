@@ -16,7 +16,7 @@ export class TypingHintProvider {
 
     /**
      * Constructs a new TypingHintProvider.
-     * 
+     *
      * @param typeContainer A container with built-in Python types.
      */
     constructor(typeContainer: DataTypeContainer) {
@@ -26,7 +26,7 @@ export class TypingHintProvider {
 
     /**
      * Determines if a document contains a typing import.
-     * 
+     *
      * @param docText The document text to search.
      * @returns True if typing is imported.
      */
@@ -48,7 +48,7 @@ export class TypingHintProvider {
 
     /**
      * Get a hint for a built-in type if typing is imported.
-     * 
+     *
      * @param type A type name.
      * @returns A type hint without a closing bracket, for example 'List[ '.
      */
@@ -63,7 +63,7 @@ export class TypingHintProvider {
 
     /**
      * Get hints if typing is imported.
-     * 
+     *
      * @param searchResult A search result to derive hints from.
      * @returns One or two type hints. For example, 'List[' and 'List[str]'.
      */
@@ -120,7 +120,7 @@ export class TypingHintProvider {
 
     /**
      * Get hints for collection types that have not been provided yet.
-     * 
+     *
      * @returns An array of types.
      */
     public getRemainingHints(): string[] {

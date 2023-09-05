@@ -44,7 +44,7 @@ suite('TypeSearch.findImport', () => {
         assert.strictEqual(actual, expected);
     });
 
-    
+
     test("value == module.Type --> returns Type for 'from module import Type'", () => {
         let value = "module.Type";
         let expected = "Type";
@@ -63,7 +63,7 @@ suite('TypeSearch.findImport', () => {
         let expected = value;
         let src = "from y import x";
         let actual = TypeSearch.findImport(value, src, false);
-        assert.strictEqual(actual, expected); 
+        assert.strictEqual(actual, expected);
     });
 
     test("ignores extra spaces and tabs", () => {

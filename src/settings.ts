@@ -22,7 +22,7 @@ export class TypeHintSettings {
     public get workspaceSearchEnabled() {
         return this._workspaceSearchEnabled;
     }
-    
+
     public readonly settingsUpdated = new EventEmitter<void>();
 
     public get onDidChangeConfiguration(): Event<void> {

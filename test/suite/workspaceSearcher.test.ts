@@ -25,7 +25,7 @@ async function addDocumentToWorkspace(documentText: string) {
 }
 
 async function setup() {
-    var r = vsc.workspace.updateWorkspaceFolders(0, undefined, { 
+    var r = vsc.workspace.updateWorkspaceFolders(0, undefined, {
         uri: vsc.Uri.parse(`${__dirname}`),
         name: "test"
     });

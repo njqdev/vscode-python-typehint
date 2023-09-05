@@ -21,7 +21,7 @@ export class DataType {
  * Container with type name keys and data type values.
  */
 export interface DataTypeContainer {
-     [key: string]: DataType 
+    [key: string]: DataType
 };
 
 export const getDataTypeContainer = (): DataTypeContainer => {
@@ -67,7 +67,7 @@ export enum TypeCategory {
 }
 
 /**
- * Built-in Python type keys with Type category values. 
+ * Built-in Python type keys with Type category values.
  */
 const typeCategories: { [key: string]: TypeCategory } = {
     bool: TypeCategory.Basic,

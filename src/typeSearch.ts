@@ -3,11 +3,11 @@ import { moduleName, PythonType } from "./python";
 /**
  * The source of a type estimation.
  */
-export enum EstimationSource { 
+export enum EstimationSource {
     ClassDefinition,
     FunctionDefinition,
     Value,
-    ValueOfOtherVariable, 
+    ValueOfOtherVariable,
 }
 
 /**
@@ -27,10 +27,10 @@ export class VariableSearchResult {
 }
 
 export class TypeSearch {
-    
+
     /**
      * Searches for a class with the same name as a value and returns the name if found.
-     * 
+     *
      * @param value The value.
      * @param src The source code to search.
      */
@@ -41,7 +41,7 @@ export class TypeSearch {
 
     /**
      * Searches for a variable with the same name as the param and detects its type.
-     * 
+     *
      * @param param The parameter name.
      * @param src The source code to search.
      */
@@ -56,7 +56,7 @@ export class TypeSearch {
         if (typeName) {
             return new VariableSearchResult(typeName, EstimationSource.Value, valueAssignment);
         }
-        
+
         variableMatch = /^ *([^(\s#"']+)\(?/.exec(valueAssignment);
         if (!variableMatch) {
             return null;
@@ -83,7 +83,7 @@ export class TypeSearch {
             variableMatch = this.variableSearchRegExp(variableMatch[1]).exec(src);
             if (variableMatch) {
                 const otherType = this.detectType(variableMatch[1]);
-                return otherType 
+                return otherType
                     ? new VariableSearchResult(otherType, EstimationSource.ValueOfOtherVariable, valueAssignment)
                     : null;
             }
@@ -117,7 +117,7 @@ export class TypeSearch {
 
     /**
      * Detects the type of a value.
-     * 
+     *
      * @returns The type name, or null if it is not a built-in Python type.
      */
     public static detectType(value: string): string | null {
@@ -155,7 +155,7 @@ export class TypeSearch {
 
     /**
      * Searches for a previously hinted parameter with the same name.
-     * 
+     *
      * @param param The parameter name.
      * @param src The source code to search.
      * @returns The type hint of the found parameter or null.
@@ -172,7 +172,7 @@ export class TypeSearch {
 
     /**
      * Searches the result for a terinary operator that might return 2 or more different types.
-     * 
+     *
      * @param searchResult The search result.
      * @returns False if it returns a single type.
      */
@@ -187,7 +187,7 @@ export class TypeSearch {
         while (ternaryMatch) {
             const elseVar = ternaryMatch[1].trim();
             let elseTypeName = this.detectType(elseVar);
-            
+
             if (elseTypeName) {
                 ternaryMatch = regExp.exec(elseTypeName);
                 if (!ternaryMatch) {
@@ -201,12 +201,12 @@ export class TypeSearch {
     }
 
     /**
-     * Detects if a value is imported and returns the imported value.  
+     * Detects if a value is imported and returns the imported value.
      * For instance, if 'from x import y' is detected for a value of 'x.y', 'y' is returned.
-     * 
+     *
      * @param value The value.
      * @param src The source code to search.
-     * @param considerAsImports Also search for 'import x as value' imports. 
+     * @param considerAsImports Also search for 'import x as value' imports.
      */
     public static findImport(value: string, src: string, considerAsImports: boolean = true): string | null {
 
@@ -222,7 +222,7 @@ export class TypeSearch {
                 match = new RegExp(
                     `^[ \t]*import +${module}|^[ \t]*from ${moduleName} import (${module})`, "m"
                 ).exec(src);
-                if (match) {    
+                if (match) {
                     return match[1] ? `${match[1]}.${type}` : value;
                 }
             }
@@ -250,7 +250,7 @@ export class TypeSearch {
     }
 
     /**
-     * Matches a line that contains 'variableName = (.+)'.  
+     * Matches a line that contains 'variableName = (.+)'.
      */
     private static variableSearchRegExp(variableName: string): RegExp {
         return new RegExp(`^[ \t]*${variableName} *= *(.+)$`, "m");

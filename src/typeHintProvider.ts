@@ -8,16 +8,16 @@ import { TypeHintSettings } from "./settings";
  * Provides type hints.
  */
 export class TypeHintProvider {
-    
+
     private _typingHintProvider: TypingHintProvider;
 
     private likelyTypes: PythonType[] = [
-        PythonType.List, 
+        PythonType.List,
         PythonType.Dict,
         PythonType.String,
-        PythonType.Bool, 
-        PythonType.Int, 
-        PythonType.Tuple, 
+        PythonType.Bool,
+        PythonType.Int,
+        PythonType.Tuple,
         PythonType.Float
     ];
     private _providedTypeHints: string[] = [];
@@ -27,9 +27,9 @@ export class TypeHintProvider {
     }
 
     /**
-     * Estimates a parameter's type and returns type hints for it. 
-     * The returned hints are ordered with the most likely type being first. 
-     * 
+     * Estimates a parameter's type and returns type hints for it.
+     * The returned hints are ordered with the most likely type being first.
+     *
      * @param param The parameter name.
      * @param documentText The text to search in order to estimate types.
      */
@@ -45,7 +45,7 @@ export class TypeHintProvider {
             this.tryAddTypingHint(typeName, typeHints, isTypingImported);
         }
 
-        const typesFound = typeHints.length > 0 
+        const typesFound = typeHints.length > 0
             || this.tryAdd(TypeSearch.hintOfSimilarParam(param, documentText), typeHints)
             || this.tryAdd(TypeSearch.classWithSameName(param, documentText), typeHints);
         if (typesFound) {
@@ -69,7 +69,7 @@ export class TypeHintProvider {
         }
         return typeHints;
     }
-    
+
     /**
      * Returns hints for types that have not been provided yet.
      */
@@ -138,7 +138,7 @@ export class TypeHintProvider {
         }
         return false;
     }
-    
+
     private tryAddTypingHints(searchResult: VariableSearchResult | null, typeHints: string[], typingImported: boolean) {
         if (typingImported) {
             const hints: string[] | null = this._typingHintProvider.getHints(searchResult);

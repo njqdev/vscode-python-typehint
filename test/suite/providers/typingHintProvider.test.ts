@@ -16,7 +16,7 @@ suite('TypingHintProvider', () => {
         let provider: TypingHintProvider;
 
         setup(() => {
-            provider = new TypingHintProvider(typeContainer);    
+            provider = new TypingHintProvider(typeContainer);
         });
 
         test("returns true for 'import typing'", async () => {
@@ -36,11 +36,11 @@ suite('TypingHintProvider', () => {
     });
 
     suite("getHint", () => {
-   
+
         let provider: TypingHintProvider;
 
         setup(() => {
-            provider = new TypingHintProvider(typeContainer);    
+            provider = new TypingHintProvider(typeContainer);
         });
 
         test("returns typing.Type[", async () => {
@@ -70,7 +70,7 @@ suite('TypingHintProvider', () => {
         let typingImported: boolean;
 
         setup(async () => {
-            typingImported = await provider.detectTypingImport(fromTypingImport);    
+            typingImported = await provider.detectTypingImport(fromTypingImport);
         });
 
         test("returns Type[ for empty collection", () => {
@@ -117,7 +117,7 @@ suite('TypingHintProvider', () => {
                 PythonType.List
             );
         });
-        
+
         function getHintsTest(provider: TypingHintProvider, testCase: TestCase, type: PythonType) {
             const actual = provider.getHints(varSearchResult(type, testCase.data));
             assert.deepStrictEqual(actual, testCase.expected, messageFor(testCase.data, testCase.expected, actual));
@@ -129,7 +129,7 @@ suite('TypingHintProvider', () => {
         let provider: TypingHintProvider;
 
         setup(() => {
-            provider = new TypingHintProvider(typeContainer);    
+            provider = new TypingHintProvider(typeContainer);
         });
 
         test("returns all typing hints if typing is not imported, without prefix followed by with prefix", async () => {
@@ -159,7 +159,7 @@ suite('TypingHintProvider', () => {
             );
         });
 
-        
+
         function getRemainingHintsTest(provider: TypingHintProvider, expected: string) {
             const actual = provider.getRemainingHints();
             assert.deepStrictEqual(actual, expected);

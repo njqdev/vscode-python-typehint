@@ -20,7 +20,7 @@ suite('TypeSearch.hintOfSimilarParam', () => {
         let actual = TypeSearch.hintOfSimilarParam(param, src);
         assert.strictEqual(actual, expected);
     });
-    
+
     test("finds hint of param with trailing parameters", () => {
         const expected = "str";
         const param = "test";
@@ -74,7 +74,7 @@ suite('TypeSearch.hintOfSimilarParam', () => {
     });
 
     test("doesn't provide items for ':' followed by ':'", () => {
-        
+
         const expected = null;
         const param = "test";
 
@@ -93,5 +93,5 @@ suite('TypeSearch.hintOfSimilarParam', () => {
         src = `def func(\n\t# {${param}: 123}`;
         assert.strictEqual(actual, expected, messageFor(src, expected, actual));
     });
-    
+
 });
