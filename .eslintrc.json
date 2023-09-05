@@ -10,11 +10,12 @@
     ],
     "rules": {
         "@typescript-eslint/naming-convention": "warn",
-        "@typescript-eslint/semi": "warn",
+        "@typescript-eslint/semi": "error",
+        "@typescript-eslint/indent": ["error", 4],
         "curly": "warn",
         "eqeqeq": "warn",
         "no-throw-literal": "warn",
-        "semi": "off"
+        "no-trailing-spaces":"warn"
     },
     "overrides": [{
         "files": ["**/*.ts"],
