@@ -1,10 +1,15 @@
-name: Release
+name: Deploy
 on:
   release:
     types:
       - published
   workflow_dispatch:
     inputs:
+      publishMS:
+        description: "Publish to the Microsoft Marketplace"
+        type: boolean
+        required: true
+        default: true
       publishOVSX:
         description: "Publish to Open VSX"
         type: boolean
@@ -56,7 +61,20 @@ jobs:
           Write-Host "::set-output name=tag::release/$version"
           Write-Host "::set-output name=version::$version"
         shell: pwsh
-        
+
+  publishMS:
+    name: Publish to VS marketplace
+    runs-on: ubuntu-latest
+    needs: package
+    if: github.event.inputs.publishMS == 'true'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.package.outputs.packageName }}
+      - name: Publish to VS marketplace
+        run: npx vsce publish --packagePath ./${{ needs.package.outputs.packageName }} -p ${{ secrets.VSCE_PAT }}
+
   publishOVSX:
     name: Publish to Open VSX
     runs-on: ubuntu-latest
