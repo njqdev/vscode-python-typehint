@@ -6,7 +6,7 @@ suite('TypeSearch.detectType', () => {
 
     test("detects ints", async () => {
         const expected = "int";
-        
+
         let src = "11";
         let actual = TypeSearch.detectType(src);
         assert.strictEqual(actual, expected, messageFor(src, expected, actual));
@@ -27,8 +27,8 @@ suite('TypeSearch.detectType', () => {
         actual = TypeSearch.detectType(src);
         assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
     });
-    
-    
+
+
     test("detects floats", async () => {
         const expected = "float";
 
@@ -89,7 +89,7 @@ suite('TypeSearch.detectType', () => {
         actual = TypeSearch.detectType(src);
         assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
     });
-    
+
     test("detects lists", async () => {
         const expected = "list";
 
@@ -161,7 +161,7 @@ suite('TypeSearch.detectType', () => {
         actual = TypeSearch.detectType(src);
         assert.strictEqual(TypeSearch.detectType(src), expected, messageFor(src, expected, actual));
     });
-    
+
     test("detects type() call", () => {
         const testCases: TestCase[] = [
             { data: "int('2')", expected: "int" },
@@ -250,7 +250,7 @@ suite('TypeSearch.variableWithSameName', function() {
         actual = await TypeSearch.variableWithSameName(param, src);
         assert.strictEqual(actual?.typeName, expected, messageFor(src, expected, actual));
     });
-    
+
     test("doesn't consider function calls to be variables", async () => {
         const expected = null;
         let src = `obj = call()`;

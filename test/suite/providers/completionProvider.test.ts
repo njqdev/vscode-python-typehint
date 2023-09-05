@@ -30,7 +30,7 @@ suite('ParamHintCompletionProvider', () => {
         actual = await providerResult(provider, param);
         assert.notStrictEqual(actual, null);
     });
-    
+
     test("provides items for param with legal non-ascii chars", async () => {
         let param = "a変な:";
         let actual = await providerResult(provider, param);
@@ -59,12 +59,12 @@ suite('ParamHintCompletionProvider', () => {
         actual = await provideCompletionItems(provider, data, pos);
         assert.notStrictEqual(actual, null, messageFor(data, expected, actual));
     });
-    
+
     test("provides default items if nothing is detected", async () => {
         let param = "notFound:";
         let expected = typeHints().concat(typingHints());
         let result = await providerResult(provider, param);
-        
+
         assert.notStrictEqual(result, null);
         const actual: string[] | undefined = result?.items.map(item => item.label.toString().trim());
         assert.deepStrictEqual(actual, expected);
@@ -80,7 +80,7 @@ suite('ParamHintCompletionProvider', () => {
         const actual: string[] | undefined = result?.items.map(item => item.label.toString().trim());
         assert.deepStrictEqual(actual, expected);
     });
-    
+
     test("does not provide items unless a function def is detected", async () => {
         let text = " :";
         let pos = new vsc.Position(0, text.length);
@@ -98,7 +98,7 @@ suite('ParamHintCompletionProvider', () => {
         let expected = null;
         let actual = await providerResult(provider, data);
         assert.strictEqual(actual, expected, messageFor(data, expected, actual));
-        
+
         data = "):\n    :";
         actual = await providerResult(provider, data);
         assert.strictEqual(actual, expected, messageFor(data, expected, actual));
@@ -179,7 +179,7 @@ async function providerResult(
 }
 
 async function provideCompletionItems(
-    provider: CompletionProvider, 
+    provider: CompletionProvider,
     documentContent: string,
     pos: vsc.Position
 ): Promise<vsc.CompletionList | null> {

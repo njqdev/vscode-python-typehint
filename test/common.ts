@@ -13,7 +13,7 @@ export class SetupError extends Error {
 }
 
 export function messageFor(testData: any, expected: any, actual: any): string {
-   return `${actual} == ${expected}. \n[Test data]\n${testData}`;
+    return `${actual} == ${expected}. \n[Test data]\n${testData}`;
 };
 
 export function varSearchResult(typeName: string, valueAssignment: string): VariableSearchResult {

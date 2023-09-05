@@ -27,7 +27,7 @@ export abstract class CompletionProvider {
     protected pushHintsToItems(typeHints: string[], completionItems: CompletionItem[], firstItemSelected: boolean) {
         const sortTextPrefix = this.itemSortPrefix.toString();
         completionItems.push(
-            firstItemSelected 
+            firstItemSelected
                 ? this.selectedCompletionItem(typeHints[0])
                 : this.newCompletionitem(typeHints[0], sortTextPrefix)
         );
@@ -55,7 +55,7 @@ export abstract class CompletionProvider {
     }
 
     abstract provideCompletionItems(
-        doc: TextDocument, 
+        doc: TextDocument,
         pos: Position,
         token: CancellationToken,
         context: CompletionContext
@@ -75,7 +75,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
     }
 
     public async provideCompletionItems(
-        doc: TextDocument, 
+        doc: TextDocument,
         pos: Position,
         token: CancellationToken,
         context: CompletionContext
@@ -84,7 +84,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
             const items: CompletionItem[] = [];
             const line = doc.lineAt(pos);
             const precedingText = line.text.substring(0, pos.character - 1).trim();
-            
+
             if (this.shouldProvideItems(precedingText, pos, doc) && !token.isCancellationRequested) {
                 const param = this.getParam(precedingText);
                 const documentText = doc.getText();
@@ -108,7 +108,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
 
                     if (token.isCancellationRequested) {
                         wsSearcher.cancel();
-                        return Promise.resolve(null); 
+                        return Promise.resolve(null);
                     }
                     this.pushHintsToItems(provider.remainingTypeHints(), items, estimations.length === 0);
                     this.itemSortPrefix++;
@@ -118,7 +118,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
                     if (hint && provider.hintNotProvided(hint)) {
                         items.unshift(this.selectedCompletionItem(hint, "0a"));
                     }
-                    return Promise.resolve(new CompletionList(items, false));  
+                    return Promise.resolve(new CompletionList(items, false));
                 }
             }
         }
@@ -135,7 +135,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
 
     /**
      * Returns the parameter which is about to be type hinted.
-     * 
+     *
      * @param precedingText The text before the active position.
      */
     private getParam(precedingText: string): string | null {
@@ -143,7 +143,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
         let param = split.length > 1 ? split[split.length - 1].trim() : precedingText;
         return !param || /[!:\]\[?/\\{}.+/=)'";@&£%¤|<>$^~¨ -]/.test(param) ? null : param;
     }
-    
+
     private pushEstimationsToItems(typeHints: string[], items: CompletionItem[]) {
 
         if (typeHints.length > 0) {
@@ -153,7 +153,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
                 let item = new CompletionItem(this.labelFor(typeHints[i]), CompletionItemKind.TypeParameter);
                 item.sortText = `${i}${typeHints[i]}`;
                 items.push(item);
-            }       
+            }
         }
     }
 
@@ -181,7 +181,7 @@ export class ParamHintCompletionProvider extends CompletionProvider implements C
 export class ReturnHintCompletionProvider extends CompletionProvider implements CompletionItemProvider {
 
     public async provideCompletionItems(
-        doc: TextDocument, 
+        doc: TextDocument,
         pos: Position,
         token: CancellationToken,
         context: CompletionContext

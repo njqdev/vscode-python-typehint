@@ -23,7 +23,7 @@ export class WorkspaceSearcher {
 
     /**
      * Searches documents, excluding the active one, for a previously hinted parameter with the same name.
-     * 
+     *
      * @param param The parameter name.
      * @param activeDocumentText The source code of the active document.
      * @returns The type of the found parameter or null.
