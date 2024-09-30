@@ -14,11 +14,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
-    - name: Install Node.js
-      uses: actions/setup-node@v3
+      uses: actions/checkout@v2
+    - name: Run headless test
+      uses: coactions/setup-xvfb@v1
       with:
-        node-version: 18.x
+        run: npm test
+        working-directory: ./
     - run: npm install
     - run: xvfb-run -a npm test
       if: runner.os == 'Linux'
